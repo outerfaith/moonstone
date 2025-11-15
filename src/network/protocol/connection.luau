@@ -23,25 +23,11 @@ function connection.read(self: Connection)
 end
 
 function connection.processPackets(self: Connection)
-    local read = self:read()
-    if read == 0 then
-        return
-    end
+    local recv = self._socket:recv(READ_LIMIT_BYTES)
+    local asbuf = byteBuf.wrap(recv)
 
-    local buf = byteBuf.wrap(self._readBuffer :: buffer)
-
-    local cont = true
-
-    while cont do
-        xpcall(function()
-            local type, data = decodePacket(buf, self:getServerboundPacketRegistry())
-            type.handle(self, data)
-        end, function()
-            cont = false
-        end)
-
-        zune.task.wait()
-    end
+    local type, data = decodePacket(asbuf, self:getServerboundPacketRegistry())
+    type.handle(self, data)
 end
 
 function connection.enqueueWrite(self: Connection, write: byteBuf.ByteBuf)

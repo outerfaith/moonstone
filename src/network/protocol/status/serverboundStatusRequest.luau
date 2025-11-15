@@ -1,14 +1,28 @@
 --!optimize 2
 
+local clientboundStatusResponse = require("./clientboundStatusResponse")
 local packet = require("../packet")
+local sharedTypes = require("../sharedTypes")
 local networkType = require("../../networkType")
 
 export type Data = nil
 
 return table.freeze({
     networkType = networkType.unit(),
-    handle = function()
-        --error("Not yet implemented")
+    handle = function(connection: sharedTypes.Connection)
+        connection:sendPacket(clientboundStatusResponse, {
+            version = {
+                name = "1.21.10",
+                protocol = 773,
+            },
+            players = {
+                max = 670,
+                online = 100,
+                sample = {},
+            },
+            description = "ross is a very cool person",
+            enforcesSecureChat = true,
+        })
     end,
 }) :: packet.ServerboundPacket<Data>
 

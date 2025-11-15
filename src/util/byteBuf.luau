@@ -39,6 +39,7 @@ type ByteBufProto = {
     readLong: (self: ByteBuf) -> number,
     readFloat: (self: ByteBuf) -> number,
     readDouble: (self: ByteBuf) -> number,
+    readString: (self: ByteBuf, length: number) -> string,
     putByte: (self: ByteBuf, value: number) -> (),
     putUnsignedByte: (self: ByteBuf, value: number) -> (),
     putBytes: (self: ByteBuf, bytes: buffer) -> (),
@@ -49,6 +50,7 @@ type ByteBufProto = {
     putLong: (self: ByteBuf, value: number) -> (),
     putFloat: (self: ByteBuf, value: number) -> (),
     putDouble: (self: ByteBuf, value: number) -> (),
+    putString: (self: ByteBuf, value: string) -> (),
 }
 
 export type ByteBuf = setmetatable<{
@@ -188,9 +190,9 @@ function byteBuf.readBytes(self, length)
 
     local read = buffer.create(length)
 
-    self.position += length
-
     buffer.copy(read, 0, self._buffer, self.position, length)
+
+    self.position += length
     return read
 end
 
@@ -247,6 +249,13 @@ function byteBuf.readDouble(self)
     return buffer.readf64(self._buffer, self.position - DOUBLE_SIZE_BYTES)
 end
 
+function byteBuf.readString(self, length)
+    assert(self.position + length <= self.limit, "attempt to read past limit")
+
+    self.position += length
+    return buffer.readstring(self._buffer, self.position - length, length)
+end
+
 function byteBuf.putByte(self, value)
     assert(self.position + BYTE_SIZE_BYTES <= self.limit, "attempt to write past limit")
 
@@ -266,8 +275,8 @@ function byteBuf.putBytes(self, bytes)
 
     assert(self.position + length <= self.limit, "attempt to write past limit")
 
+    buffer.copy(self._buffer, self.position, bytes, 0, length)
     self.position += length
-    buffer.copy(self._buffer, self.position, bytes, length)
 end
 
 function byteBuf.putShort(self, value)
@@ -324,6 +333,15 @@ function byteBuf.putDouble(self, value)
 
     self.position += DOUBLE_SIZE_BYTES
     buffer.writef64(self._buffer, self.position - DOUBLE_SIZE_BYTES, value)
+end
+
+function byteBuf.putString(self, value)
+    local length = string.len(value)
+
+    assert(self.position + length <= self.limit, "attempt to write past limit")
+
+    self.position += length
+    buffer.writestring(self._buffer, self.position - length, value)
 end
 
 local function wrap(buf: buffer): ByteBuf

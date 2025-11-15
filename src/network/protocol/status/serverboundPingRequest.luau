@@ -1,5 +1,6 @@
 --!optimize 2
 
+local clientboundPongResponse = require("./clientboundPongResponse")
 local packet = require("../packet")
 local sharedTypes = require("../sharedTypes")
 local networkType = require("../../networkType")
@@ -13,7 +14,7 @@ return table.freeze({
         { networkType.LONG, "payload" },
     }),
     handle = function(connection: sharedTypes.Connection, data: Data)
-        --error("Not yet implemented")
+        connection:sendPacket(clientboundPongResponse, data)
     end,
 }) :: packet.ServerboundPacket<Data>
 

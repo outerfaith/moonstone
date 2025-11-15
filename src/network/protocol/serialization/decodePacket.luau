@@ -11,6 +11,7 @@ local function decodePacket<T>(
     registry: packetRegistry.PacketRegistry
 ): (packet.ServerboundPacket<T>, T)
     -- TODO(outerfaith): consume and check packet length
+    networkType.VAR_INT:read(buf)
 
     local id = networkType.VAR_INT:read(buf)
     local type = registry:get(id)

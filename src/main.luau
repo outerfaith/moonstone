@@ -20,22 +20,19 @@ end
 socket:bindIp("127.0.0.1", 25565)
 socket:listen()
 
-task.spawn(function()
-    while socket:isOpen() do
-        local incoming = socket:accept()
-        local conn = connection.new(incoming)
-        task.spawn(function()
-            while conn._socket:isOpen() do
-                pcall(function()
-                    conn:processPackets()
-                    conn:flush()
-                end)
-                task.wait()
-            end
-        end)
-        task.wait()
-    end
-end)
+while socket:isOpen() do
+    local incoming = socket:accept()
+    local conn = connection.new(incoming)
+    task.spawn(function()
+        while conn._socket:isOpen() do
+            pcall(function()
+                conn:processPackets()
+            end)
+            conn:flush()
+        end
+    end)
+    task.wait()
+end
 
 --[[
    Copyright 2025 Outerfaith
