@@ -1,0 +1,12 @@
+name = "outerfaith/moonstone"
+version = "0.1.0"
+description = 'An open-source server implementation for Minecraft 1.21.10'
+authors = ["Outerfaith"]
+repository = "https://github.com/outerfaith/moonstone"
+license = "Apache-2.0"
+
+[target]
+environment = "luau"
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
