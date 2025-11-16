@@ -20,29 +20,24 @@ end
 local function encodePacket<T>(pkt: packet.Packet<T>, data: T, id: number): byteBuf.ByteBuf
     assert(id >= 0, "id must be non-negative")
 
-    local buf = byteBuf.allocate(8192)
-    local lengthIndex = buf.position
+    local payload = byteBuf.allocate(4096)
 
-    buf:skip(3)
-    networkType.VAR_INT:write(buf, id)
-    pkt.networkType:write(buf, data)
+    networkType.VAR_INT:write(payload, id)
+    pkt.networkType:write(payload, data)
 
-    local payloadLength = buf.position - (lengthIndex + 3)
-    local lengthBytes = getVarIntSize(payloadLength)
+    payload:flip()
 
-    if lengthBytes ~= 3 then
-        local delta = lengthBytes - 3
-        local payloadStart = lengthIndex + 3
-        local payloadLength1 = buf.position - payloadStart
+    local payloadLen = payload.limit
+    local lengthSize = getVarIntSize(payloadLen)
+    local out = byteBuf.allocate(lengthSize + payloadLen)
 
-        buf:shift(payloadStart, payloadLength1, delta)
-        buf:setPosition(buf.position + delta)
-    end
+    networkType.VAR_INT:write(out, payloadLen)
+    buffer.copy(out._buffer, out.position, payload._buffer, 0, payloadLen)
 
-    networkType.VAR_INT:writeAtOffset(buf, lengthIndex, payloadLength)
-    buf:flip()
+    out.position = out.position + payloadLen
+    out:flip()
 
-    return buf
+    return out
 end
 
 return encodePacket
