@@ -17,11 +17,6 @@ local READ_LIMIT_BYTES = 8192
 local connection = {} :: ConnectionProto
 connection.__index = connection
 
-function connection.read(self: Connection)
-    self._readBuffer = self._socket:recv(READ_LIMIT_BYTES)
-    return buffer.len(self._readBuffer :: buffer)
-end
-
 function connection.processPackets(self: Connection)
     local recv = self._socket:recv(READ_LIMIT_BYTES)
     local asbuf = byteBuf.wrap(recv)
@@ -60,10 +55,25 @@ function connection.close(self: Connection)
     self._socket:close()
 end
 
+function connection.addPersistentValue(self: Connection, key, value)
+    assert(self._metadata[key] == nil, `there is already a metadata entry for '{key}'`)
+    self._metadata[key] = value
+end
+
+function connection.removePersistentValue(self: Connection, key)
+    assert(self._metadata[key] ~= nil, `no metadata has been registered for '{key}'`)
+    self._metadata[key] = nil
+end
+
+function connection.clearPersistentValues(self: Connection)
+    table.clear(self._metadata)
+end
+
 local function new(socket: NetworkSocket)
     return setmetatable({
         _socket = socket,
         _writeQueue = linkedQueue.new(),
+        _metadata = {},
         intent = enum.intent.HANDSHAKE,
     }, connection) :: Connection
 end

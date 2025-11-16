@@ -26,7 +26,6 @@ export type PacketRegistry = setmetatable<{
 
 export type ConnectionProto = {
     __index: ConnectionProto,
-    read: (self: Connection) -> number,
     processPackets: (self: Connection) -> (),
     enqueueWrite: (self: Connection, write: byteBuf.ByteBuf) -> (),
     sendPacket: <T>(self: Connection, packet: Packet<T>, data: T) -> (),
@@ -34,12 +33,16 @@ export type ConnectionProto = {
     getServerboundPacketRegistry: (self: Connection) -> PacketRegistry,
     flush: (self: Connection) -> (),
     close: (self: Connection) -> (),
+    addPersistentValue: (self: Connection, key: string, value: any) -> (),
+    removePersistentValue: (self: Connection, key: string) -> (),
+    clearPersistentValues: (self: Connection) -> (),
 }
 
 export type Connection = setmetatable<{
     read _socket: NetworkSocket,
     _readBuffer: buffer?,
     read _writeQueue: linkedQueue.LinkedQueue,
+    read _metadata: { [string]: any },
     intent: number,
 }, ConnectionProto>
 

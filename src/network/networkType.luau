@@ -209,6 +209,53 @@ end
 
 local UNLIMITED_STRING = limitedString(32767)
 
+local BYTE_ARRAY = simple(function(buf: byteBuf.ByteBuf)
+    local length = VAR_INT:read(buf)
+    local bytes = buf:readBytes(length)
+
+    return bytes
+end, function(buf: byteBuf.ByteBuf, val: buffer)
+    if val == nil then
+        VAR_INT:write(buf, 0)
+        return
+    end
+
+    VAR_INT:write(buf, buffer.len(val))
+    buf:putBytes(val)
+end)
+
+local UUID = simple(function(buf: byteBuf.ByteBuf)
+    local bytes = {}
+    for i = 1, 16 do
+        bytes[i] = buf:readUnsignedByte()
+    end
+
+    local hex = {}
+    for i = 1, 16 do
+        hex[#hex + 1] = string.format("%02x", bytes[i])
+    end
+
+    local s = table.concat(hex)
+
+    return string.format(
+        "%s-%s-%s-%s-%s",
+        s:sub(1, 8),
+        s:sub(9, 12),
+        s:sub(13, 16),
+        s:sub(17, 20),
+        s:sub(21, 32)
+    )
+end, function(buf: byteBuf.ByteBuf, value: string)
+    local hex = value:gsub("-", ""):lower()
+
+    for i = 1, 32, 2 do
+        local byteHex = hex:sub(i, i + 1)
+        local byte = tonumber(byteHex, 16)
+
+        buf:putUnsignedByte(byte)
+    end
+end)
+
 local function json<T>(): NetworkType<T>
     return simple(function(buf: byteBuf.ByteBuf)
         local json = UNLIMITED_STRING:read(buf)
@@ -260,6 +307,8 @@ return table.freeze({
     VAR_LONG = VAR_LONG,
     limitedString = limitedString,
     UNLIMITED_STRING = UNLIMITED_STRING,
+    BYTE_ARRAY = BYTE_ARRAY,
+    UUID = UUID,
     json = json,
     struct = struct,
     unit = unit,

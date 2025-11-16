@@ -8,6 +8,10 @@ local clientboundPongResponse = require("./status/clientboundPongResponse")
 local clientboundStatusResponse = require("./status/clientboundStatusResponse")
 local serverboundPingRequest = require("./status/serverboundPingRequest")
 local serverboundStatusRequest = require("./status/serverboundStatusRequest")
+local clientboundEncryptionRequest = require("./login/clientboundEncryptionRequest")
+local clientboundLoginFinished = require("./login/clientboundLoginFinished")
+local serverboundLoginAcknowledged = require("./login/serverboundLoginAcknowledged")
+local serverboundLoginStart = require("./login/serverboundLoginStart")
 
 type PacketRegistryProto = sharedTypes.PacketRegistryProto
 export type PacketRegistry = sharedTypes.PacketRegistry
@@ -53,15 +57,23 @@ local SERVERBOUND_STATUS_PACKETS = create()
 local CLIENTBOUND_STATUS_PACKETS = create()
     :register(0x00, clientboundStatusResponse)
     :register(0x01, clientboundPongResponse)
+local SERVERBOUND_LOGIN_PACKETS = create()
+    :register(0x00, serverboundLoginStart)
+    :register(0x03, serverboundLoginAcknowledged)
+local CLIENTBOUND_LOGIN_PACKETS = create()
+    :register(0x01, clientboundEncryptionRequest)
+    :register(0x02, clientboundLoginFinished)
 --stylua: ignore end
 
 local SERVERBOUND_REGISTRIES: { [number]: PacketRegistry } = {
     [enum.intent.HANDSHAKE] = SERVERBOUND_HANDSHAKE_PACKETS,
     [enum.intent.STATUS] = SERVERBOUND_STATUS_PACKETS,
+    [enum.intent.LOGIN] = SERVERBOUND_LOGIN_PACKETS,
 }
 
 local CLIENTBOUND_REGISTRIES: { [number]: PacketRegistry } = {
     [enum.intent.STATUS] = CLIENTBOUND_STATUS_PACKETS,
+    [enum.intent.LOGIN] = CLIENTBOUND_LOGIN_PACKETS,
 }
 
 local function serverboundForIntent(intent: number): PacketRegistry
