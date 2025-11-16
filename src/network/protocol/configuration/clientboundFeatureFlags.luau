@@ -1,26 +1,15 @@
 --!optimize 2
 
 local packet = require("../packet")
-local sharedTypes = require("../sharedTypes")
-local clientboundFeatureFlags = require("../configuration/clientboundFeatureFlags")
 local networkType = require("../../networkType")
-local enum = require("../../../util/enum")
-local identifier = require("../../../util/identifier")
 
-export type Data = nil
+export type Data = {
+    read payload: number,
+}
 
 return table.freeze({
-    networkType = networkType.unit(),
-    handle = function(connection: sharedTypes.Connection)
-        print("login acknowledged")
-        connection.intent = enum.intent.CONFIGURATION
-        -- TODO(outerfaith): put all configuration stuff here
-        -- need to load these values dynamically at some point
-        connection:sendPacket(clientboundFeatureFlags, {
-            identifier.withDefaultNamespace("vanilla"),
-        })
-    end,
-}) :: packet.ServerboundPacket<Data>
+    networkType = networkType.array(networkType.IDENTIFIER),
+}) :: packet.Packet<Data>
 
 --[[
    Copyright 2025 Outerfaith

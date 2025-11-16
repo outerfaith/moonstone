@@ -3,15 +3,23 @@
 local enum = require("../../util/enum")
 local packet = require("./packet")
 local sharedTypes = require("./sharedTypes")
+
+local serverboundPluginMessage = require("./common/serverboundPluginMessage")
+
 local serverboundHandshakePacket = require("./handshake/serverboundHandshakePacket")
+
 local clientboundPongResponse = require("./status/clientboundPongResponse")
 local clientboundStatusResponse = require("./status/clientboundStatusResponse")
 local serverboundPingRequest = require("./status/serverboundPingRequest")
 local serverboundStatusRequest = require("./status/serverboundStatusRequest")
+
 local clientboundEncryptionRequest = require("./login/clientboundEncryptionRequest")
 local clientboundLoginFinished = require("./login/clientboundLoginFinished")
 local serverboundLoginAcknowledged = require("./login/serverboundLoginAcknowledged")
 local serverboundLoginStart = require("./login/serverboundLoginStart")
+
+local clientboundFeatureFlags = require("./configuration/clientboundFeatureFlags")
+local serverboundClientInformation = require("./configuration/serverboundClientInformation")
 
 type PacketRegistryProto = sharedTypes.PacketRegistryProto
 export type PacketRegistry = sharedTypes.PacketRegistry
@@ -63,17 +71,24 @@ local SERVERBOUND_LOGIN_PACKETS = create()
 local CLIENTBOUND_LOGIN_PACKETS = create()
     :register(0x01, clientboundEncryptionRequest)
     :register(0x02, clientboundLoginFinished)
+local SERVERBOUND_CONFIGURATION_PACKETS = create()
+    :register(0x00, serverboundClientInformation)
+    :register(0x02, serverboundPluginMessage)
+local CLIENTBOUND_CONFIGURATION_PACKETS = create()
+    :register(0x0C, clientboundFeatureFlags)
 --stylua: ignore end
 
 local SERVERBOUND_REGISTRIES: { [number]: PacketRegistry } = {
     [enum.intent.HANDSHAKE] = SERVERBOUND_HANDSHAKE_PACKETS,
     [enum.intent.STATUS] = SERVERBOUND_STATUS_PACKETS,
     [enum.intent.LOGIN] = SERVERBOUND_LOGIN_PACKETS,
+    [enum.intent.CONFIGURATION] = SERVERBOUND_CONFIGURATION_PACKETS,
 }
 
 local CLIENTBOUND_REGISTRIES: { [number]: PacketRegistry } = {
     [enum.intent.STATUS] = CLIENTBOUND_STATUS_PACKETS,
     [enum.intent.LOGIN] = CLIENTBOUND_LOGIN_PACKETS,
+    [enum.intent.CONFIGURATION] = CLIENTBOUND_CONFIGURATION_PACKETS,
 }
 
 local function serverboundForIntent(intent: number): PacketRegistry

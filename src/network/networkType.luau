@@ -4,6 +4,7 @@
 local jsonOps = zune.serde.json
 
 local byteBuf = require("../util/byteBuf")
+local identifier = require("../util/identifier")
 
 export type NetworkType<T> = {
     read: (self: NetworkType<T>, buf: byteBuf.ByteBuf) -> T,
@@ -209,6 +210,12 @@ end
 
 local UNLIMITED_STRING = limitedString(32767)
 
+local IDENTIFIER = simple(function(buf: byteBuf.ByteBuf)
+    return identifier.parse(UNLIMITED_STRING:read(buf))
+end, function(buf: byteBuf.ByteBuf, val: identifier.Identifier)
+    UNLIMITED_STRING:write(buf, tostring(val))
+end)
+
 local BYTE_ARRAY = simple(function(buf: byteBuf.ByteBuf)
     local length = VAR_INT:read(buf)
     local bytes = buf:readBytes(length)
@@ -222,6 +229,12 @@ end, function(buf: byteBuf.ByteBuf, val: buffer)
 
     VAR_INT:write(buf, buffer.len(val))
     buf:putBytes(val)
+end)
+
+local TERMINATING_BYTE_ARRAY = simple(function(buf: byteBuf.ByteBuf)
+    return buf:readBytes(buf:getRemaining())
+end, function(buf: byteBuf.ByteBuf, value: buffer)
+    buf:putBytes(value)
 end)
 
 local UUID = simple(function(buf: byteBuf.ByteBuf)
@@ -293,6 +306,26 @@ local function unit<T>()
     end, function() end)
 end
 
+local function array<T>(type: NetworkType<T>)
+    return simple(function(buf: byteBuf.ByteBuf)
+        local length = VAR_INT:read(buf)
+        local result = table.create(length)
+
+        for i = 1, length do
+            table.insert(result, type:read(buf))
+        end
+
+        return result
+    end, function(buf: byteBuf.ByteBuf, value: { T })
+        local length = #value
+
+        VAR_INT:write(buf, length)
+        for idx, entry in value do
+            type:write(buf, entry)
+        end
+    end)
+end
+
 return table.freeze({
     BOOLEAN = BOOLEAN,
     BYTE = BYTE,
@@ -307,11 +340,14 @@ return table.freeze({
     VAR_LONG = VAR_LONG,
     limitedString = limitedString,
     UNLIMITED_STRING = UNLIMITED_STRING,
+    IDENTIFIER = IDENTIFIER,
     BYTE_ARRAY = BYTE_ARRAY,
+    TERMINATING_BYTE_ARRAY = TERMINATING_BYTE_ARRAY,
     UUID = UUID,
     json = json,
     struct = struct,
     unit = unit,
+    array = array,
 })
 
 --[[

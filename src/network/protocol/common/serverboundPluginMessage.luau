@@ -2,23 +2,25 @@
 
 local packet = require("../packet")
 local sharedTypes = require("../sharedTypes")
-local clientboundFeatureFlags = require("../configuration/clientboundFeatureFlags")
 local networkType = require("../../networkType")
-local enum = require("../../../util/enum")
 local identifier = require("../../../util/identifier")
 
-export type Data = nil
+export type Data = {
+    read key: identifier.Identifier,
+    read data: buffer,
+}
 
 return table.freeze({
-    networkType = networkType.unit(),
-    handle = function(connection: sharedTypes.Connection)
-        print("login acknowledged")
-        connection.intent = enum.intent.CONFIGURATION
-        -- TODO(outerfaith): put all configuration stuff here
-        -- need to load these values dynamically at some point
-        connection:sendPacket(clientboundFeatureFlags, {
-            identifier.withDefaultNamespace("vanilla"),
-        })
+    networkType = networkType.struct({
+        { networkType.IDENTIFIER, "key" },
+        { networkType.TERMINATING_BYTE_ARRAY, "data" },
+    }),
+    handle = function(connection: sharedTypes.Connection, data: Data)
+        -- TODO(outerfaith): handle plugin messages
+        -- handler only exists right now so the configuration process can be completed
+        -- the vanilla client sends one plugin message during config phase (minecraft:brand) and we need to respond with the server brand info
+        -- i think modded clients also send plugin messages that contain a list of the mods they expect
+        print(`recieved plugin message '{data.key}'`)
     end,
 }) :: packet.ServerboundPacket<Data>
 
