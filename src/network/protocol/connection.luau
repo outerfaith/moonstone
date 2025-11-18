@@ -47,7 +47,9 @@ end
 function connection.flush(self: Connection)
     while not self._writeQueue:isEmpty() do
         local write: byteBuf.ByteBuf = self._writeQueue:poll()
+        print(buffer.len(write._buffer))
         self._socket:send(write._buffer)
+        print("flushed")
     end
 end
 
