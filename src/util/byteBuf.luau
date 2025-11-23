@@ -199,29 +199,51 @@ end
 function byteBuf.readShort(self)
     assert(self.position + SHORT_SIZE_BYTES <= self.limit, "attempt to read past limit")
 
-    self.position += SHORT_SIZE_BYTES
-    return buffer.readi16(self._buffer, self.position - SHORT_SIZE_BYTES)
+    local high = self:readUnsignedByte()
+    local low = self:readUnsignedByte()
+
+    local res = high * 256 + low
+    if res >= 0x8000 then
+        res -= 0x10000
+    end
+
+    return res
 end
 
 function byteBuf.readUnsignedShort(self)
     assert(self.position + SHORT_SIZE_BYTES <= self.limit, "attempt to read past limit")
 
-    self.position += SHORT_SIZE_BYTES
-    return buffer.readu16(self._buffer, self.position - SHORT_SIZE_BYTES)
+    local high = self:readUnsignedByte()
+    local low = self:readUnsignedByte()
+
+    return high * 256 + low
 end
 
 function byteBuf.readInt(self)
     assert(self.position + INT_SIZE_BYTES <= self.limit, "attempt to read past limit")
 
-    self.position += INT_SIZE_BYTES
-    return buffer.readi32(self._buffer, self.position - INT_SIZE_BYTES)
+    local a = self:readUnsignedByte()
+    local b = self:readUnsignedByte()
+    local c = self:readUnsignedByte()
+    local d = self:readUnsignedByte()
+
+    local res = a * 16777216 + b * 65536 + c * 256 + d
+    if res >= 0x80000000 then
+        res -= 0x100000000
+    end
+
+    return res
 end
 
 function byteBuf.readUnsignedInt(self)
     assert(self.position + INT_SIZE_BYTES <= self.limit, "attempt to read past limit")
 
-    self.position += INT_SIZE_BYTES
-    return buffer.readu32(self._buffer, self.position - INT_SIZE_BYTES)
+    local a = self:readUnsignedByte()
+    local b = self:readUnsignedByte()
+    local c = self:readUnsignedByte()
+    local d = self:readUnsignedByte()
+
+    return a * 16777216 + b * 65536 + c * 256 + d
 end
 
 function byteBuf.readLong(self)
@@ -238,15 +260,23 @@ end
 function byteBuf.readFloat(self)
     assert(self.position + FLOAT_SIZE_BYTES <= self.limit, "attempt to read past limit")
 
-    self.position += FLOAT_SIZE_BYTES
-    return buffer.readf32(self._buffer, self.position - FLOAT_SIZE_BYTES)
+    local r = buffer.create(FLOAT_SIZE_BYTES)
+    for i = FLOAT_SIZE_BYTES - 1, 0, -1 do
+        buffer.writeu8(r, i, self:readUnsignedByte())
+    end
+
+    return buffer.readf32(r, 0)
 end
 
 function byteBuf.readDouble(self)
     assert(self.position + DOUBLE_SIZE_BYTES <= self.limit, "attempt to read past limit")
 
-    self.position += DOUBLE_SIZE_BYTES
-    return buffer.readf64(self._buffer, self.position - DOUBLE_SIZE_BYTES)
+    local r = buffer.create(DOUBLE_SIZE_BYTES)
+    for i = DOUBLE_SIZE_BYTES - 1, 0, -1 do
+        buffer.writeu8(r, i, self:readUnsignedByte())
+    end
+
+    return buffer.readf64(r, 0)
 end
 
 function byteBuf.readString(self, length)
@@ -282,29 +312,57 @@ end
 function byteBuf.putShort(self, value)
     assert(self.position + SHORT_SIZE_BYTES <= self.limit, "attempt to write past limit")
 
-    self.position += SHORT_SIZE_BYTES
-    buffer.writei16(self._buffer, self.position - SHORT_SIZE_BYTES, value)
+    if value < 0 then
+        value = value + 0x10000
+    end
+
+    local high = math.floor(value / 256)
+    local low = value % 256
+
+    self:putUnsignedByte(high)
+    self:putUnsignedByte(low)
 end
 
 function byteBuf.putUnsignedShort(self, value)
     assert(self.position + SHORT_SIZE_BYTES <= self.limit, "attempt to write past limit")
 
-    self.position += SHORT_SIZE_BYTES
-    buffer.writeu16(self._buffer, self.position - SHORT_SIZE_BYTES, value)
+    local high = math.floor(value / 256)
+    local low = value % 256
+
+    self:putUnsignedByte(high)
+    self:putUnsignedByte(low)
 end
 
 function byteBuf.putInt(self, value)
     assert(self.position + INT_SIZE_BYTES <= self.limit, "attempt to write past limit")
 
-    self.position += INT_SIZE_BYTES
-    buffer.writei32(self._buffer, self.position - INT_SIZE_BYTES, value)
+    if value < 0 then
+        value += 0x100000000
+    end
+
+    local a = math.floor(value / 16777216) % 256
+    local b = math.floor(value / 65536) % 256
+    local c = math.floor(value / 256) % 256
+    local d = value % 256
+
+    self:putUnsignedByte(a)
+    self:putUnsignedByte(b)
+    self:putUnsignedByte(c)
+    self:putUnsignedByte(d)
 end
 
 function byteBuf.putUnsignedInt(self, value)
-    assert(self.position + INT_MAX_SIZE <= self.limit, "attempt to write past limit")
+    assert(self.position + INT_SIZE_BYTES <= self.limit, "attempt to write past limit")
 
-    self.position += INT_SIZE_BYTES
-    buffer.writeu32(self._buffer, self.position - INT_SIZE_BYTES, value)
+    local a = math.floor(value / 16777216) % 256
+    local b = math.floor(value / 65536) % 256
+    local c = math.floor(value / 256) % 256
+    local d = value % 256
+
+    self:putUnsignedByte(a)
+    self:putUnsignedByte(b)
+    self:putUnsignedByte(c)
+    self:putUnsignedByte(d)
 end
 
 function byteBuf.putLong(self, value)
@@ -324,15 +382,25 @@ end
 function byteBuf.putFloat(self, value)
     assert(self.position + FLOAT_SIZE_BYTES <= self.limit, "attempt to write past limit")
 
-    self.position += FLOAT_SIZE_BYTES
-    buffer.writef32(self._buffer, self.position - FLOAT_SIZE_BYTES, value)
+    local w = buffer.create(FLOAT_SIZE_BYTES)
+
+    buffer.writef32(w, 0, value)
+
+    for i = FLOAT_SIZE_BYTES - 1, 0, -1 do
+        self:putUnsignedByte(buffer.readu8(w, i))
+    end
 end
 
 function byteBuf.putDouble(self, value)
     assert(self.position + DOUBLE_SIZE_BYTES <= self.limit, "attempt to write past limit")
 
-    self.position += DOUBLE_SIZE_BYTES
-    buffer.writef64(self._buffer, self.position - DOUBLE_SIZE_BYTES, value)
+    local w = buffer.create(DOUBLE_SIZE_BYTES)
+
+    buffer.writef64(w, 0, value)
+
+    for i = DOUBLE_SIZE_BYTES - 1, 0, -1 do
+        self:putUnsignedByte(buffer.readu8(w, i))
+    end
 end
 
 function byteBuf.putString(self, value)
