@@ -218,7 +218,7 @@ function byteBuf.readInt(self)
 end
 
 function byteBuf.readUnsignedInt(self)
-    assert(self.position + INT_MAX_SIZE <= self.limit, "attempt to read past limit")
+    assert(self.position + INT_SIZE_BYTES <= self.limit, "attempt to read past limit")
 
     self.position += INT_SIZE_BYTES
     return buffer.readu32(self._buffer, self.position - INT_SIZE_BYTES)
@@ -228,8 +228,8 @@ function byteBuf.readLong(self)
     assert(self.position + LONG_SIZE_BYTES <= self.limit, "attempt to read past limit")
 
     local read = 0
-    for i = 1, LONG_SIZE_BYTES do
-        read = bit32.bor(bit32.lshift(read, 8), self:readUnsignedByte())
+    for i = 0, LONG_SIZE_BYTES - 1 do
+        read = read * 256 + self:readUnsignedByte()
     end
 
     return read
@@ -314,10 +314,10 @@ function byteBuf.putLong(self, value)
     local low = value % INT_MAX_SIZE
 
     for i = 3, 0, -1 do
-        self:putUnsignedByte(bit32.rshift(high, i * LONG_SIZE_BYTES) % 256)
+        self:putUnsignedByte(math.floor(high / 2 ^ (i * LONG_SIZE_BYTES)) % 256)
     end
     for i = 3, 0, -1 do
-        self:putUnsignedByte(bit32.lshift(low, i * LONG_SIZE_BYTES) % 256)
+        self:putUnsignedByte(math.floor(low / 2 ^ (i * LONG_SIZE_BYTES)) % 256)
     end
 end
 

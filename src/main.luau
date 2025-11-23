@@ -5,6 +5,7 @@ local net = zune.net
 local task = zune.task
 
 local connection = require("./network/protocol/connection")
+local byteBuf = require("./util/byteBuf")
 
 local socket = net.createSocket(
     net.ADDRF.INET,
