@@ -33,6 +33,11 @@ export type Transcoder<T> = {
     createIntArray: (self: Transcoder<T>, value: { number }) -> T,
     getLongArray: (self: Transcoder<T>, value: T) -> dataResult.DataResult<{ number }>,
     createLongArray: (self: Transcoder<T>, value: { number }) -> T,
+    convertTo: <O>(
+        self: Transcoder<T>,
+        to: Transcoder<O>,
+        value: T
+    ) -> dataResult.DataResult<O>,
 }
 
 return nil

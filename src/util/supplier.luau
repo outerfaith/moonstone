@@ -1,7 +1,9 @@
 --!optimize 2
 --!strict
 
-local function memoize<T>(supplier: () -> T)
+export type Supplier<T> = () -> T
+
+local function memoize<T>(supplier: Supplier<T>)
     local value: T? = nil
 
     return function()
@@ -12,8 +14,15 @@ local function memoize<T>(supplier: () -> T)
     end
 end
 
+local function lazyRequire<T>(path: string): Supplier<T>
+    return memoize(function()
+        return (require)(path)
+    end)
+end
+
 return table.freeze({
     memoize = memoize,
+    lazyRequire = lazyRequire,
 })
 
 --[[
