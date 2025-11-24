@@ -3,7 +3,27 @@
 
 local dataResult = require("./dataResult")
 
+export type MapLike<T> = setmetatable<{}, {
+    __index: MapLike<T>,
+    keys: (self: MapLike<T>) -> { string },
+    contains: (self: MapLike<T>, key: string) -> boolean,
+    get: (self: MapLike<T>, key: string) -> dataResult.DataResult<T>,
+}>
+
+export type ListBuilder<T> = setmetatable<{}, {
+    __index: ListBuilder<T>,
+    add: (self: ListBuilder<T>, value: T) -> ListBuilder<T>,
+    build: (self: ListBuilder<T>) -> T,
+}>
+
+export type MapBuilder<T> = setmetatable<{}, {
+    __index: MapBuilder<T>,
+    put: (self: MapBuilder<T>, key: T, value: T) -> MapBuilder<T>,
+    build: (self: MapBuilder<T>) -> T,
+}>
+
 export type Transcoder<T> = {
+    __index: Transcoder<T>,
     createEmpty: (self: Transcoder<T>) -> T,
     getBoolean: (self: Transcoder<T>, value: T) -> dataResult.DataResult<boolean>,
     createBoolean: (self: Transcoder<T>, value: boolean) -> T,
@@ -22,22 +42,17 @@ export type Transcoder<T> = {
     getString: (self: Transcoder<T>, value: T) -> dataResult.DataResult<string>,
     createString: (self: Transcoder<T>, value: string) -> T,
     getList: (self: Transcoder<T>, value: T) -> dataResult.DataResult<{ T }>,
-    createList: (self: Transcoder<T>, size: number) -> T,
+    createList: (self: Transcoder<T>, size: number) -> ListBuilder<T>,
     createEmptyList: (self: Transcoder<T>) -> T,
-    getMap: (self: Transcoder<T>, value: T) -> dataResult.DataResult<{ [string]: T }>,
-    createMap: (self: Transcoder<T>) -> { [string]: T },
-    createEmptyMap: (self: Transcoder<T>) -> { [string]: T },
-    getByteArray: (self: Transcoder<T>, value: T) -> dataResult.DataResult<buffer>,
-    createByteArray: (self: Transcoder<T>, value: buffer) -> T,
+    getMap: (self: Transcoder<T>, value: T) -> dataResult.DataResult<MapLike<T>>,
+    createMap: (self: Transcoder<T>) -> MapBuilder<T>,
+    createEmptyMap: (self: Transcoder<T>) -> T,
+    getByteArray: (self: Transcoder<T>, value: T) -> dataResult.DataResult<{ number }>,
+    createByteArray: (self: Transcoder<T>, value: { number }) -> T,
     getIntArray: (self: Transcoder<T>, value: T) -> dataResult.DataResult<{ number }>,
     createIntArray: (self: Transcoder<T>, value: { number }) -> T,
     getLongArray: (self: Transcoder<T>, value: T) -> dataResult.DataResult<{ number }>,
     createLongArray: (self: Transcoder<T>, value: { number }) -> T,
-    convertTo: <O>(
-        self: Transcoder<T>,
-        to: Transcoder<O>,
-        value: T
-    ) -> dataResult.DataResult<O>,
 }
 
 return nil
