@@ -4,6 +4,7 @@ local enum = require("../../util/enum")
 local packet = require("./packet")
 local sharedTypes = require("./sharedTypes")
 
+local clientboundUpdateTags = require("./common/clientboundUpdateTags")
 local serverboundPluginMessage = require("./common/serverboundPluginMessage")
 
 local serverboundHandshakePacket = require("./handshake/serverboundHandshakePacket")
@@ -19,7 +20,15 @@ local serverboundLoginAcknowledged = require("./login/serverboundLoginAcknowledg
 local serverboundLoginStart = require("./login/serverboundLoginStart")
 
 local clientboundFeatureFlags = require("./configuration/clientboundFeatureFlags")
+local clientboundFinishConfiguration = require("./configuration/clientboundFinishConfiguration")
+local clientboundRegistryData = require("./configuration/clientboundRegistryData")
+local clientboundSelectKnownPacks = require("./configuration/clientboundSelectKnownPacks")
+local serverboundFinishConfiguration = require("./configuration/serverboundFinishConfiguration")
 local serverboundClientInformation = require("./configuration/serverboundClientInformation")
+local serverboundSelectKnownPacks = require("./configuration/serverboundSelectKnownPacks")
+
+local clientboundGameEvent = require("./play/clientboundGameEvent")
+local clientboundLoginPacket = require("./play/clientboundLoginPacket")
 
 type PacketRegistryProto = sharedTypes.PacketRegistryProto
 export type PacketRegistry = sharedTypes.PacketRegistry
@@ -74,8 +83,18 @@ local CLIENTBOUND_LOGIN_PACKETS = create()
 local SERVERBOUND_CONFIGURATION_PACKETS = create()
     :register(0x00, serverboundClientInformation)
     :register(0x02, serverboundPluginMessage)
+    :register(0x03, serverboundFinishConfiguration)
+    :register(0x07, serverboundSelectKnownPacks)
 local CLIENTBOUND_CONFIGURATION_PACKETS = create()
+    :register(0x03, clientboundFinishConfiguration)
+    :register(0x07, clientboundRegistryData)
     :register(0x0C, clientboundFeatureFlags)
+    :register(0x0D, clientboundUpdateTags)
+    :register(0x0E, clientboundSelectKnownPacks)
+local SERVERBOUND_PLAY_PACKETS = create()
+local CLIENTBOUND_PLAY_PACKETS = create()
+    :register(0x26, clientboundGameEvent)
+    :register(0x30, clientboundLoginPacket)
 --stylua: ignore end
 
 local SERVERBOUND_REGISTRIES: { [number]: PacketRegistry } = {
@@ -83,12 +102,14 @@ local SERVERBOUND_REGISTRIES: { [number]: PacketRegistry } = {
     [enum.intent.STATUS] = SERVERBOUND_STATUS_PACKETS,
     [enum.intent.LOGIN] = SERVERBOUND_LOGIN_PACKETS,
     [enum.intent.CONFIGURATION] = SERVERBOUND_CONFIGURATION_PACKETS,
+    [enum.intent.PLAY] = SERVERBOUND_PLAY_PACKETS,
 }
 
 local CLIENTBOUND_REGISTRIES: { [number]: PacketRegistry } = {
     [enum.intent.STATUS] = CLIENTBOUND_STATUS_PACKETS,
     [enum.intent.LOGIN] = CLIENTBOUND_LOGIN_PACKETS,
     [enum.intent.CONFIGURATION] = CLIENTBOUND_CONFIGURATION_PACKETS,
+    [enum.intent.PLAY] = CLIENTBOUND_PLAY_PACKETS,
 }
 
 local function serverboundForIntent(intent: number): PacketRegistry

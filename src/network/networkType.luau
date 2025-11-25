@@ -3,6 +3,7 @@
 
 local jsonOps = zune.serde.json
 
+local tagIO = require("../nbt/tagIO")
 local byteBuf = require("../util/byteBuf")
 local identifier = require("../util/identifier")
 
@@ -269,6 +270,30 @@ end, function(buf: byteBuf.ByteBuf, value: string)
     end
 end)
 
+local NBT = simple(function(buf)
+    return tagIO.read(buf)
+end, function(buf, value)
+    tagIO.write(buf, value)
+end)
+
+local function optional<T>(other: NetworkType<T>): NetworkType<T?>
+    return simple(function(buf)
+        local present = BOOLEAN:read(buf)
+        if not present then
+            return nil
+        end
+        return other:read(buf)
+    end, function(buf, value)
+        if value == nil then
+            BOOLEAN:write(buf, false)
+            return
+        end
+
+        BOOLEAN:write(buf, true)
+        other:write(buf, value)
+    end)
+end
+
 local function json<T>(): NetworkType<T>
     return simple(function(buf: byteBuf.ByteBuf)
         local json = UNLIMITED_STRING:read(buf)
@@ -344,6 +369,8 @@ return table.freeze({
     BYTE_ARRAY = BYTE_ARRAY,
     TERMINATING_BYTE_ARRAY = TERMINATING_BYTE_ARRAY,
     UUID = UUID,
+    NBT = NBT,
+    optional = optional,
     json = json,
     struct = struct,
     unit = unit,

@@ -2,8 +2,12 @@
 
 local packet = require("../packet")
 local sharedTypes = require("../sharedTypes")
+local clientboundUpdateTags = require("../common/clientboundUpdateTags")
 local clientboundFeatureFlags = require("../configuration/clientboundFeatureFlags")
+local clientboundRegistryData = require("../configuration/clientboundRegistryData")
+local clientboundSelectKnownPacks = require("../configuration/clientboundSelectKnownPacks")
 local networkType = require("../../networkType")
+local knownPack = require("../../../resources/knownPack")
 local enum = require("../../../util/enum")
 local identifier = require("../../../util/identifier")
 
@@ -19,6 +23,45 @@ return table.freeze({
         connection:sendPacket(clientboundFeatureFlags, {
             identifier.withDefaultNamespace("vanilla"),
         })
+        connection:sendPacket(clientboundSelectKnownPacks, {
+            packs = { knownPack.create("minecraft", "core", "1.21.10") },
+        })
+        local f = zune.serde.json.decode(zune.fs.readFile("data/networked_registries.json"))
+        for registry, fieldData in f do
+            local fields = {}
+            for idx, ignored in fieldData do
+                table.insert(fields, {
+                    id = idx,
+                    data = nil,
+                })
+            end
+            connection:sendPacket(clientboundRegistryData, {
+                id = identifier.parse(registry),
+                entries = fields,
+            })
+        end
+        local t = zune.serde.json.decode(zune.fs.readFile("data/tags.json"))
+        local compiled = {}
+        for registry, tagData in t do
+            local rident = identifier.parse(registry)
+            local tags = {}
+            for idx, entries in tagData do
+                local tagidx = identifier.parse(idx)
+                local tagentries = {}
+                for tidx, ignored in ipairs(entries) do
+                    table.insert(tagentries, tidx)
+                end
+                table.insert(tags, {
+                    name = tagidx,
+                    entries = tagentries,
+                })
+            end
+            table.insert(compiled, {
+                registry = rident,
+                tags = tags,
+            })
+        end
+        connection:sendPacket(clientboundUpdateTags, compiled)
     end,
 }) :: packet.ServerboundPacket<Data>
 

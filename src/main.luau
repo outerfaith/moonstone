@@ -25,7 +25,9 @@ while socket:isOpen() do
     local conn = connection.new(incoming)
     task.spawn(function()
         while conn._socket:isOpen() do
-            conn:processPackets()
+            pcall(function()
+                conn:processPackets()
+            end)
             conn:flush()
         end
     end)

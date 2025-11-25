@@ -20,7 +20,9 @@ end
 local function encodePacket<T>(pkt: packet.Packet<T>, data: T, id: number): byteBuf.ByteBuf
     assert(id >= 0, "id must be non-negative")
 
-    local payload = byteBuf.allocate(4096)
+    --- TODO(outerfaith): compute packet payload size to avoid oversized buffers like this
+    --- when sending tags packet
+    local payload = byteBuf.allocate(8192 * 16)
 
     networkType.VAR_INT:write(payload, id)
     pkt.networkType:write(payload, data)
