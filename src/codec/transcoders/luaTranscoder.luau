@@ -339,9 +339,7 @@ function luaTranscoder.createLongArray(self, value)
     return value
 end
 
-return table.freeze({
-    INSTANCE = create(),
-})
+return create()
 
 --[[
    Copyright 2025 Outerfaith

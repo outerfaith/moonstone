@@ -51,7 +51,7 @@ function dataResult.orElse<T>(self: DataResult<T>, other: T): T
 end
 
 function dataResult.__tostring<T>(self: DataResult<T>): string
-    return self:isSuccess() and tostring(self.value) or self.msg
+    return self:isSuccess() and `DataResult({tostring(self.value)})` or self.msg :: string
 end
 
 return dataResult

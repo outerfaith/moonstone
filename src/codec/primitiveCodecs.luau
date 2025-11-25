@@ -1,7 +1,7 @@
 --!optimize 2
 --!native
 
-local codec = require("@self")
+local codec = require("./")
 local dataResult = require("./dataResult")
 
 local BOOLEAN = codec.new(function(t, v)
@@ -52,26 +52,6 @@ end, function(t, d)
     return t:getString(d)
 end)
 
-local LIST = codec.new(function(t, v)
-    local list = t:createList(#v)
-    for idx, value in v do
-        list:add(value)
-    end
-    return dataResult.ok(list:build())
-end, function(t, d)
-    return t:getList(d)
-end)
-
-local MAP = codec.new(function(t, v)
-    local map = t:createMap()
-    for key, value in v do
-        map:put(key, value)
-    end
-    return dataResult.ok(map:build())
-end, function(t, d)
-    return t:getMap(d)
-end)
-
 local BYTE_ARRAY = codec.new(function(t, v)
     return dataResult.ok(t:createByteArray(v))
 end, function(t, d)
@@ -99,8 +79,6 @@ return table.freeze({
     FLOAT = FLOAT,
     DOUBLE = DOUBLE,
     STRING = STRING,
-    LIST = LIST,
-    MAP = MAP,
     BYTE_ARRAY = BYTE_ARRAY,
     INT_ARRAY = INT_ARRAY,
     LONG_ARRAY = LONG_ARRAY,
