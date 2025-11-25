@@ -41,7 +41,7 @@ export type ConnectionProto = {
 export type Connection = setmetatable<{
     read _socket: NetworkSocket,
     _readBuffer: buffer?,
-    read _writeQueue: linkedQueue.LinkedQueue,
+    read _writeQueue: linkedQueue.LinkedQueue<byteBuf.ByteBuf>,
     read _metadata: { [string]: any },
     intent: number,
 }, ConnectionProto>

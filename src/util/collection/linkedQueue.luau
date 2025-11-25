@@ -1,29 +1,29 @@
 --!optimize 2
 
-type Node<T> = {
+local linkedQueue = {}
+linkedQueue.__index = linkedQueue
+
+export type Node<T> = {
     read value: T,
     next: Node<T>?,
 }
 
-type LinkedQueueProto = {
-    __index: LinkedQueueProto,
-    __iter: (self: LinkedQueue) -> () -> any?,
-    add: (self: LinkedQueue, value: any) -> (),
-    peek: (self: LinkedQueue) -> any?,
-    poll: (self: LinkedQueue) -> any?,
-    isEmpty: (self: LinkedQueue) -> boolean,
-}
+export type LinkedQueue<T> = typeof(setmetatable(
+    {} :: {
+        head: Node<T>?,
+        tail: Node<T>?,
+        size: number,
+    },
+    linkedQueue
+))
 
-export type LinkedQueue = setmetatable<{
-    head: Node<any>?,
-    tail: Node<any>?,
-    size: number,
-}, LinkedQueueProto>
+function linkedQueue.new<T>(): LinkedQueue<T>
+    return setmetatable({
+        size = 0,
+    }, linkedQueue)
+end
 
-local linkedQueue = {} :: LinkedQueueProto
-linkedQueue.__index = linkedQueue
-
-function linkedQueue.__iter(self)
+function linkedQueue.__iter<T>(self: LinkedQueue<T>): () -> T?
     local node = self.head
 
     return function()
@@ -38,8 +38,8 @@ function linkedQueue.__iter(self)
     end
 end
 
-function linkedQueue.add(self, value)
-    local node: Node<any> = {
+function linkedQueue.add<T>(self: LinkedQueue<T>, value: T)
+    local node: Node<T> = {
         value = value,
     }
 
@@ -53,12 +53,12 @@ function linkedQueue.add(self, value)
     self.size += 1
 end
 
-function linkedQueue.peek(self)
+function linkedQueue.peek<T>(self: LinkedQueue<T>)
     local head = self.head
-    return head and head.value or nil
+    return if head ~= nil then head.value else nil
 end
 
-function linkedQueue.poll(self)
+function linkedQueue.poll<T>(self: LinkedQueue<T>): T?
     local head = self.head
 
     if head == nil then
@@ -74,19 +74,11 @@ function linkedQueue.poll(self)
     return head.value
 end
 
-function linkedQueue.isEmpty(self)
+function linkedQueue.isEmpty<T>(self: LinkedQueue<T>)
     return self.head == nil
 end
 
-local function new()
-    return setmetatable({
-        size = 0,
-    }, linkedQueue) :: LinkedQueue
-end
-
-return table.freeze({
-    new = new,
-})
+return linkedQueue
 
 --[[
    Copyright 2025 Outerfaith

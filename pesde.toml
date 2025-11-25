@@ -11,6 +11,9 @@ environment = "luau"
 [indices]
 default = "https://github.com/pesde-pkg/index"
 
+[dependencies]
+jecs = { name = "marked/jecs", version = "^0.9.0" }
+
 [dev_dependencies]
 stylua = { name = "pesde/stylua", version = "^2.3.0", target = "lune" }
 
