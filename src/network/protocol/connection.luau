@@ -47,28 +47,12 @@ end
 function connection.flush(self: Connection)
     while not self._writeQueue:isEmpty() do
         local write: byteBuf.ByteBuf = self._writeQueue:poll()
-        print(buffer.len(write._buffer))
         self._socket:send(write._buffer)
-        print("flushed")
     end
 end
 
 function connection.close(self: Connection)
     self._socket:close()
-end
-
-function connection.addPersistentValue(self: Connection, key, value)
-    assert(self._metadata[key] == nil, `there is already a metadata entry for '{key}'`)
-    self._metadata[key] = value
-end
-
-function connection.removePersistentValue(self: Connection, key)
-    assert(self._metadata[key] ~= nil, `no metadata has been registered for '{key}'`)
-    self._metadata[key] = nil
-end
-
-function connection.clearPersistentValues(self: Connection)
-    table.clear(self._metadata)
 end
 
 local function new(socket: NetworkSocket)
