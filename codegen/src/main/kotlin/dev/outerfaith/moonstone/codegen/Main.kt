@@ -20,6 +20,7 @@ import com.google.gson.JsonObject
 import com.mojang.logging.LogUtils
 import dev.outerfaith.moonstone.codegen.generator.DataGeneratorInstance
 import dev.outerfaith.moonstone.codegen.generator.DataSource
+import dev.outerfaith.moonstone.codegen.generator.TagGeneratorInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
@@ -147,11 +148,41 @@ fun generateNetworked(output: Path) {
     output.writeText(root.toString())
 }
 
+fun generateTags(output: Path) {
+    val tagSources = listOf(
+        registryAccess.lookupOrThrow(Registries.POINT_OF_INTEREST_TYPE),
+        registryAccess.lookupOrThrow(Registries.BIOME),
+        registryAccess.lookupOrThrow(Registries.GAME_EVENT),
+        registryAccess.lookupOrThrow(Registries.BANNER_PATTERN),
+        registryAccess.lookupOrThrow(Registries.DIALOG),
+        registryAccess.lookupOrThrow(Registries.FLUID),
+        registryAccess.lookupOrThrow(Registries.ENTITY_TYPE),
+        registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE),
+        registryAccess.lookupOrThrow(Registries.PAINTING_VARIANT),
+        registryAccess.lookupOrThrow(Registries.INSTRUMENT),
+        registryAccess.lookupOrThrow(Registries.ITEM),
+        registryAccess.lookupOrThrow(Registries.ENCHANTMENT),
+        registryAccess.lookupOrThrow(Registries.BLOCK),
+    )
+    
+    val root = JsonObject()
+    
+    for (source in tagSources) {
+        val generator = TagGeneratorInstance(source, registryAccess)
+        
+        root.add(source.key().identifier().toShortString(), generator.generate())
+    }
+    
+    output.writeText(root.toString())
+}
+
 fun main(args: Array<String>) = runBlocking {
     val output = Path.of(args.first())
     val networkOutput = output.resolve("networked_registries.json").createParentDirectories()
+    val tagOutput = output.resolve("tags.json").createParentDirectories()
     
     bootstrap()
     
     generateNetworked(networkOutput)
+    generateTags(tagOutput)
 }
