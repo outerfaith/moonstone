@@ -46,6 +46,7 @@ import net.minecraft.world.entity.animal.chicken.ChickenVariant
 import net.minecraft.world.entity.animal.cow.CowVariant
 import net.minecraft.world.entity.animal.feline.CatVariant
 import net.minecraft.world.entity.animal.frog.FrogVariant
+import net.minecraft.world.entity.animal.nautilus.ZombieNautilusVariant
 import net.minecraft.world.entity.animal.pig.PigVariant
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariant
 import net.minecraft.world.entity.animal.wolf.WolfVariant
@@ -129,7 +130,8 @@ fun generateNetworked(output: Path) {
         DataSource(registryAccess.lookupOrThrow(Registries.PAINTING_VARIANT), PaintingVariant.DIRECT_CODEC),
         DataSource(registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE), DimensionType.NETWORK_CODEC),
         DataSource(registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE), DamageType.DIRECT_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.BANNER_PATTERN), BannerPattern.DIRECT_CODEC)
+        DataSource(registryAccess.lookupOrThrow(Registries.BANNER_PATTERN), BannerPattern.DIRECT_CODEC),
+        DataSource(registryAccess.lookupOrThrow(Registries.ZOMBIE_NAUTILUS_VARIANT), ZombieNautilusVariant.NETWORK_CODEC),
     )
 
     val root = JsonObject()
@@ -163,6 +165,8 @@ fun generateTags(output: Path) {
         registryAccess.lookupOrThrow(Registries.ITEM),
         registryAccess.lookupOrThrow(Registries.ENCHANTMENT),
         registryAccess.lookupOrThrow(Registries.BLOCK),
+        registryAccess.lookupOrThrow(Registries.TIMELINE),
+        registryAccess.lookupOrThrow(Registries.WORLD_CLOCK),
     )
     
     val root = JsonObject()
