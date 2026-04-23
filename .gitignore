@@ -1,2 +1,9 @@
+cmake-build-*
+.idea/
+target/
+build/
 *.lock
 *_packages
+.gradle
+.kotlin
+run

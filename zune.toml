@@ -1,6 +1,0 @@
-[workspace.scripts]
-main = "src/main.luau"
-
-[runtime.luau.options]
-optimization_level = 2
-native_code_gen = true
