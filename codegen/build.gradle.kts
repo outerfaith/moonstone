@@ -14,7 +14,9 @@ repositories {
 minecraft {
     version("26.1.2")
     runs {
-        server()
+        server("codegenServer") {
+            mainClass("dev.outerfaith.moonstone.codegen.MainKt")
+        }
     }
     platform(org.spongepowered.gradle.vanilla.repository.MinecraftPlatform.SERVER)
 }
