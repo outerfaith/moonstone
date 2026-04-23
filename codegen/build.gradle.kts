@@ -11,6 +11,10 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0-rc01")
+}
+
 minecraft {
     version("26.1.2")
     runs {
