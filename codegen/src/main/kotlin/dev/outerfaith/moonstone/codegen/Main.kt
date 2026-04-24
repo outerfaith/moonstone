@@ -18,6 +18,7 @@ package dev.outerfaith.moonstone.codegen
 
 import com.google.gson.JsonObject
 import com.mojang.logging.LogUtils
+import com.mojang.serialization.Codec
 import dev.outerfaith.moonstone.codegen.generator.DataGeneratorInstance
 import dev.outerfaith.moonstone.codegen.generator.DataSource
 import dev.outerfaith.moonstone.codegen.generator.TagGeneratorInstance
@@ -29,7 +30,6 @@ import net.minecraft.SharedConstants
 import net.minecraft.commands.Commands
 import net.minecraft.core.RegistryAccess
 import net.minecraft.core.registries.Registries
-import net.minecraft.network.chat.ChatType
 import net.minecraft.resources.RegistryDataLoader
 import net.minecraft.server.Bootstrap
 import net.minecraft.server.MinecraftServer
@@ -41,24 +41,9 @@ import net.minecraft.server.packs.resources.MultiPackResourceManager
 import net.minecraft.server.permissions.LevelBasedPermissionSet
 import net.minecraft.tags.TagLoader
 import net.minecraft.util.Util
-import net.minecraft.world.damagesource.DamageType
-import net.minecraft.world.entity.animal.chicken.ChickenVariant
-import net.minecraft.world.entity.animal.cow.CowVariant
-import net.minecraft.world.entity.animal.feline.CatVariant
-import net.minecraft.world.entity.animal.frog.FrogVariant
-import net.minecraft.world.entity.animal.nautilus.ZombieNautilusVariant
-import net.minecraft.world.entity.animal.pig.PigVariant
-import net.minecraft.world.entity.animal.wolf.WolfSoundVariant
-import net.minecraft.world.entity.animal.wolf.WolfVariant
-import net.minecraft.world.entity.decoration.painting.PaintingVariant
 import net.minecraft.world.flag.FeatureFlags
-import net.minecraft.world.item.equipment.trim.TrimMaterial
-import net.minecraft.world.item.equipment.trim.TrimPattern
 import net.minecraft.world.level.DataPackConfig
 import net.minecraft.world.level.WorldDataConfiguration
-import net.minecraft.world.level.biome.Biome
-import net.minecraft.world.level.block.entity.BannerPattern
-import net.minecraft.world.level.dimension.DimensionType
 import java.nio.file.Path
 import java.util.stream.Stream
 import kotlin.io.path.createParentDirectories
@@ -115,25 +100,10 @@ suspend fun bootstrap() = withContext(Dispatchers.Default) {
 }
 
 fun generateNetworked(output: Path) {
-    val generators = listOf(
-        DataSource(registryAccess.lookupOrThrow(Registries.BIOME), Biome.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.CHAT_TYPE), ChatType.DIRECT_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.TRIM_PATTERN), TrimPattern.DIRECT_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.TRIM_MATERIAL), TrimMaterial.DIRECT_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.WOLF_VARIANT), WolfVariant.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.WOLF_SOUND_VARIANT), WolfSoundVariant.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.PIG_VARIANT), PigVariant.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.FROG_VARIANT), FrogVariant.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.CAT_VARIANT), CatVariant.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.COW_VARIANT), CowVariant.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.CHICKEN_VARIANT), ChickenVariant.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.PAINTING_VARIANT), PaintingVariant.DIRECT_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE), DimensionType.NETWORK_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE), DamageType.DIRECT_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.BANNER_PATTERN), BannerPattern.DIRECT_CODEC),
-        DataSource(registryAccess.lookupOrThrow(Registries.ZOMBIE_NAUTILUS_VARIANT), ZombieNautilusVariant.NETWORK_CODEC),
-    )
-
+    @Suppress("UNCHECKED_CAST")
+    val generators = RegistryDataLoader.SYNCHRONIZED_REGISTRIES
+        .map { data -> DataSource(registryAccess.lookupOrThrow(data.key), data.elementCodec as Codec<Any>) }
+    
     val root = JsonObject()
     
     for (generator in generators) {
@@ -152,27 +122,27 @@ fun generateNetworked(output: Path) {
 
 fun generateTags(output: Path) {
     val tagSources = listOf(
-        registryAccess.lookupOrThrow(Registries.POINT_OF_INTEREST_TYPE),
-        registryAccess.lookupOrThrow(Registries.BIOME),
-        registryAccess.lookupOrThrow(Registries.GAME_EVENT),
-        registryAccess.lookupOrThrow(Registries.BANNER_PATTERN),
-        registryAccess.lookupOrThrow(Registries.DIALOG),
-        registryAccess.lookupOrThrow(Registries.FLUID),
-        registryAccess.lookupOrThrow(Registries.ENTITY_TYPE),
-        registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE),
-        registryAccess.lookupOrThrow(Registries.PAINTING_VARIANT),
         registryAccess.lookupOrThrow(Registries.INSTRUMENT),
-        registryAccess.lookupOrThrow(Registries.ITEM),
+        registryAccess.lookupOrThrow(Registries.DIALOG),
+        registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE),
         registryAccess.lookupOrThrow(Registries.ENCHANTMENT),
+        registryAccess.lookupOrThrow(Registries.ENTITY_TYPE),
+        registryAccess.lookupOrThrow(Registries.ITEM),
+        registryAccess.lookupOrThrow(Registries.POINT_OF_INTEREST_TYPE),
         registryAccess.lookupOrThrow(Registries.BLOCK),
+        registryAccess.lookupOrThrow(Registries.BIOME),
+        registryAccess.lookupOrThrow(Registries.FLUID),
         registryAccess.lookupOrThrow(Registries.TIMELINE),
-        registryAccess.lookupOrThrow(Registries.WORLD_CLOCK),
+        registryAccess.lookupOrThrow(Registries.POTION),
+        registryAccess.lookupOrThrow(Registries.BANNER_PATTERN),
+        registryAccess.lookupOrThrow(Registries.PAINTING_VARIANT),
+        registryAccess.lookupOrThrow(Registries.GAME_EVENT)
     )
     
     val root = JsonObject()
     
     for (source in tagSources) {
-        val generator = TagGeneratorInstance(source, registryAccess)
+        val generator = TagGeneratorInstance(source)
         
         root.add(source.key().identifier().toShortString(), generator.generate())
     }

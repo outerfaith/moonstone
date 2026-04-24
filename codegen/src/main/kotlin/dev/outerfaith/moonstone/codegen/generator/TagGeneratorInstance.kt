@@ -20,9 +20,8 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import net.minecraft.core.Registry
-import net.minecraft.core.RegistryAccess
 
-class TagGeneratorInstance<T : Any>(private val registry: Registry<T>, private val registryAccess: RegistryAccess) {
+class TagGeneratorInstance<T : Any>(private val registry: Registry<T>) {
     
     fun generate(): JsonElement {
         val root = JsonObject()
