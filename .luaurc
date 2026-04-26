@@ -1,11 +1,10 @@
 {
+    "languageMode": "strict",
     "lint": {
         "*": true
-    }, 
+    },
     "aliases": {
-        "std": "~/.lute/typedefs/1.0.1/std", 
-        "lint": "~/.lute/typedefs/1.0.1/lint", 
-        "lute": "~/.lute/typedefs/1.0.1/lute",
+        "eryx": "~/eryx/modules",
         "pkg": "./luau_packages"
     }
 }
