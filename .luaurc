@@ -4,7 +4,10 @@
         "*": true
     },
     "aliases": {
-        "eryx": "~/eryx/modules",
-        "pkg": "./luau_packages"
+        "std": "./.seal/typedefs/std/",
+        "extra": "./.seal/extra/",
+        "interop": "./.seal/typedefs/interop/",
+        "pkg": "./luau_packages",
+        "vendor": "./vendor"
     }
 }

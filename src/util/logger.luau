@@ -1,6 +1,6 @@
 --!optimize 2
 
-local stdio = require("@eryx/stdio")
+local io = require("@std/io")
 local ansi = require("./ansi")
 
 export type Level = "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL"
@@ -59,13 +59,7 @@ function logger.log(self: Logger, level: Level, msg: string)
 
     local fmt_msg = `{fmt_time} {fmt_level} {fmt_name}{msg}\n`
 
-    if level == "FATAL" or level == "ERROR" then
-        stdio.writeerr(fmt_msg)
-        stdio.flusherr()
-    else
-        stdio.write(fmt_msg)
-        stdio.flush()
-    end
+    io.output.write(fmt_msg, true)
 end
 
 function logger.trace(self: Logger, msg: string)

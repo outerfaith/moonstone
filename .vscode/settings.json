@@ -1,12 +1,18 @@
 {
-    "stylua.targetReleaseVersion": "latest",
-    "luau-lsp.sourcemap.autogenerate": false,
-    "luau-lsp.sourcemap.enabled": false,
-    "luau-lsp.fflags.enableNewSolver": true,
-    "luau-lsp.fflags.enableByDefault": true,
-    "luau-lsp.platform.type": "standard",
-    "editor.formatOnSave": true,
-    "[luau]": {
-        "editor.defaultFormatter": "JohnnyMorganz.stylua"
-    }
+  "luau-lsp.sourcemap.enabled": false,
+  "luau-lsp.types.documentationFiles": [
+    "./.seal/typedefs/docs.json"
+  ],
+  "luau-lsp.fflags.enableByDefault": true,
+  "luau-lsp.platform.type": "standard",
+  "luau-lsp.sourcemap.autogenerate": false,
+  "luau-lsp.types.definitionFiles": {
+    "@seal": "./.seal/typedefs/globals.d.luau"
+  },
+  "luau-lsp.fflags.enableNewSolver": true,
+  "[luau]": {
+    "editor.defaultFormatter": "JohnnyMorganz.stylua"
+  },
+  "editor.formatOnSave": true,
+  "stylua.targetReleaseVersion": "latest"
 }
