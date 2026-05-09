@@ -8,6 +8,7 @@
         "extra": "./.seal/extra/",
         "interop": "./.seal/typedefs/interop/",
         "pkg": "./luau_packages",
-        "vendor": "./vendor"
+        "vendor": "./vendor",
+        "moonstone": "./src"
     }
 }

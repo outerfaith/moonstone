@@ -1,7 +1,8 @@
 --!optimize 2
 
 local io = require("@std/io")
-local ansi = require("./ansi")
+
+local ansi = require("@moonstone/util/ansi")
 
 export type Level = "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL"
 
@@ -33,7 +34,6 @@ local LEVEL_STYLES: { [Level]: { number }? } = table.freeze({
     FATAL = { ansi.STYLES.BOLD, ansi.STYLES.BLINK },
 } :: any)
 
-@checked
 local function get_time_string(): string
     local time = os.date("*t")
     return string.format("%02d:%02d:%02d", time.hour, time.min, time.sec)
@@ -42,7 +42,6 @@ end
 local logger = {} :: LoggerProto
 logger.__index = logger
 
-@checked
 local function new(name: string?): Logger
     return table.freeze(setmetatable({ name = name }, logger))
 end
