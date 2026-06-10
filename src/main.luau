@@ -4,12 +4,10 @@
 -- this file should only handle argument parsing and then instantiate whatever
 -- handles this logic
 
-local time = require("@std/time")
-local tcp = require("@std/net/tcp")
+local task = require("@std/task")
+local net = require("@lute/net")
 
 local world = require("@moonstone/ecs/world")
-local server = require("@moonstone/ecs/components/server")
-local connection_manager = require("@moonstone/ecs/systems/connection_manager")
 local scheduler = require("@moonstone/ecs/systems/scheduler")
 local identifier = require("@moonstone/resources/identifier")
 local logger = require("@moonstone/util/logger")
@@ -20,17 +18,15 @@ local log = logger.new("Main coroutine")
 local ticker = scheduler.new(world)
 
 ticker
-    :add_phase(
-        scheduler.create_phase_with_systems(
-            identifier.with_default_namespace("pre"),
-            { connection_manager.accept_new_connections }
-        )
-    )
+    :add_phase(scheduler.create_phase_with_systems(identifier.with_default_namespace("pre"), {}))
     :add_phase(scheduler.create_phase_with_systems(identifier.with_default_namespace("tick"), {}))
     :add_phase(scheduler.create_phase_with_systems(identifier.with_default_namespace("post"), {}))
 
-world:set(world:entity(), server, {
-    tcp_server = tcp.serve(25565),
+net.server.listen({
+    port = 25565,
+    onconnection = function(stream, server)
+        error("not yet implemented")
+    end,
 })
 
 local accumulated = 0
@@ -52,7 +48,7 @@ while true do
     local sleep = TICK_INTERVAL - (finish - start)
 
     if sleep > 0 then
-        time.wait(sleep)
+        task.wait(sleep)
     else
         log:warn(`Tick took longer than expected: {string.format("%.3fs", finish - start)}`)
     end

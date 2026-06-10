@@ -58,7 +58,7 @@ function logger.log(self: Logger, level: Level, msg: string)
 
     local fmt_msg = `{fmt_time} {fmt_level} {fmt_name}{msg}\n`
 
-    io.output.write(fmt_msg, true)
+    io.write(fmt_msg)
 end
 
 function logger.trace(self: Logger, msg: string)
