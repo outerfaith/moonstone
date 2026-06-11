@@ -23,18 +23,18 @@ export type Identifier = setmetatable<{
     read path: string,
 }, IdentifierProto>
 
-local DEFAULT_NAMESPACE = "moonstone"
-local MINECRAFT_NAMESPACE = "minecraft"
-local NAMESPACE_SEPARATOR = ":"
-local NAMESPACE_PATTERN = "[a-z0-9_%.%-]"
-local PATH_PATTERN = "[a-z0-9/%.%_%-]"
+const DEFAULT_NAMESPACE = "moonstone"
+const MINECRAFT_NAMESPACE = "minecraft"
+const NAMESPACE_SEPARATOR = ":"
+const NAMESPACE_PATTERN = "[a-z0-9_%.%-]"
+const PATH_PATTERN = "[a-z0-9/%.%_%-]"
 
-local identifier = {} :: IdentifierProto
+const identifier = {} :: IdentifierProto
 identifier.__index = identifier
 
-local function is_valid_namespace(namespace: string): boolean
+const function is_valid_namespace(namespace: string): boolean
     for i = 1, string.len(namespace) do
-        local char = string.sub(namespace, i, i)
+        const char = string.sub(namespace, i, i)
 
         if not string.match(char, NAMESPACE_PATTERN) then
             return false
@@ -44,9 +44,9 @@ local function is_valid_namespace(namespace: string): boolean
     return true
 end
 
-local function is_valid_path(path: string): boolean
+const function is_valid_path(path: string): boolean
     for i = 1, string.len(path) do
-        local char = string.sub(path, i, i)
+        const char = string.sub(path, i, i)
 
         if not string.match(char, PATH_PATTERN) then
             return false
@@ -56,7 +56,7 @@ local function is_valid_path(path: string): boolean
     return true
 end
 
-local function new(namespace: string, path: string): Identifier
+const function new(namespace: string, path: string): Identifier
     assert(is_valid_namespace(namespace), "namespace contains invalid characters")
     assert(is_valid_path(path), "path contains invalid characters")
 
@@ -66,20 +66,20 @@ local function new(namespace: string, path: string): Identifier
     }, identifier)) :: any
 end
 
-local function with_default_namespace(path: string): Identifier
+const function with_default_namespace(path: string): Identifier
     return new(DEFAULT_NAMESPACE, path)
 end
 
-local function with_minecraft_namespace(path: string): Identifier
+const function with_minecraft_namespace(path: string): Identifier
     return new(MINECRAFT_NAMESPACE, path)
 end
 
-local function parse(input: string): Identifier
-    local separator = string.find(input, NAMESPACE_SEPARATOR, 1, true)
+const function parse(input: string): Identifier
+    const separator = string.find(input, NAMESPACE_SEPARATOR, 1, true)
 
     if separator ~= nil then
-        local namespace = string.sub(input, 1, separator - 1)
-        local path = string.sub(input, separator + 1)
+        const namespace = string.sub(input, 1, separator - 1)
+        const path = string.sub(input, separator + 1)
 
         assert(namespace ~= nil, "separator must come before path value")
 

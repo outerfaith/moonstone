@@ -1,23 +1,22 @@
 --!optimize 2
---!native
 
-local test = require("@std/test")
+const test = require("@std/test")
 
-local jecs = require("@vendor/jecs")
+const jecs = require("@vendor/jecs")
 
-local identifier = require("@moonstone/resources/identifier")
-local scheduler = require("@moonstone/ecs/systems/scheduler")
+const identifier = require("@moonstone/resources/identifier")
+const scheduler = require("@moonstone/ecs/systems/scheduler")
 
-local function new_world()
+const function new_world()
     return jecs.world()
 end
 
 test.suite("Scheduler", function(suite)
     suite:case("creates schedulers and phases", function(asserts)
-        local world = new_world()
-        local phase_id = identifier.with_default_namespace("tick")
-        local phase = scheduler.create_phase(phase_id)
-        local ticker = scheduler.new(world)
+        const world = new_world()
+        const phase_id = identifier.with_default_namespace("tick")
+        const phase = scheduler.create_phase(phase_id)
+        const ticker = scheduler.new(world)
 
         asserts.eq(world, ticker.world)
         asserts.eq({}, ticker.phases)
@@ -26,11 +25,11 @@ test.suite("Scheduler", function(suite)
     end)
 
     suite:case("adds and finds phases by identifier value", function(asserts)
-        local pre_id = identifier.with_default_namespace("pre")
-        local tick_id = identifier.with_default_namespace("tick")
-        local pre = scheduler.create_phase(pre_id)
-        local tick = scheduler.create_phase(tick_id)
-        local ticker = scheduler.new(new_world())
+        const pre_id = identifier.with_default_namespace("pre")
+        const tick_id = identifier.with_default_namespace("tick")
+        const pre = scheduler.create_phase(pre_id)
+        const tick = scheduler.create_phase(tick_id)
+        const ticker = scheduler.new(new_world())
 
         asserts.eq(ticker, ticker:add_phase(pre))
         asserts.eq(ticker, ticker:add_phase(tick))
@@ -42,12 +41,12 @@ test.suite("Scheduler", function(suite)
     end)
 
     suite:case("schedules systems into an existing phase", function(asserts)
-        local phase_id = identifier.with_default_namespace("tick")
-        local phase = scheduler.create_phase(phase_id)
-        local ticker = scheduler.new(new_world()):add_phase(phase)
+        const phase_id = identifier.with_default_namespace("tick")
+        const phase = scheduler.create_phase(phase_id)
+        const ticker = scheduler.new(new_world()):add_phase(phase)
 
-        local function first() end
-        local function second() end
+        const function first() end
+        const function second() end
 
         asserts.eq(
             ticker,
@@ -57,13 +56,13 @@ test.suite("Scheduler", function(suite)
     end)
 
     suite:case("ticks systems in phase and system insertion order", function(asserts)
-        local world = new_world()
-        local ticker = scheduler.new(world)
-        local pre_id = identifier.with_default_namespace("pre")
-        local tick_id = identifier.with_default_namespace("tick")
-        local calls = {}
+        const world = new_world()
+        const ticker = scheduler.new(world)
+        const pre_id = identifier.with_default_namespace("pre")
+        const tick_id = identifier.with_default_namespace("tick")
+        const calls = {}
 
-        local function record(name: string)
+        const function record(name: string)
             return function(call_world, tick_delta)
                 table.insert(calls, {
                     name = name,
@@ -89,18 +88,18 @@ test.suite("Scheduler", function(suite)
     end)
 
     suite:case("supports phases created with initial systems", function(asserts)
-        local world = new_world()
-        local phase_id = identifier.with_default_namespace("initial")
+        const world = new_world()
+        const phase_id = identifier.with_default_namespace("initial")
         local called_with_world = false
         local called_with_tick_delta = 0
 
-        local function initial_system(call_world, tick_delta)
+        const function initial_system(call_world, tick_delta)
             called_with_world = call_world == world
             called_with_tick_delta = tick_delta
         end
 
-        local phase = scheduler.create_phase_with_systems(phase_id, { initial_system })
-        local ticker = scheduler.new(world):add_phase(phase)
+        const phase = scheduler.create_phase_with_systems(phase_id, { initial_system })
+        const ticker = scheduler.new(world):add_phase(phase)
 
         asserts.eq({ initial_system }, phase.systems)
 
@@ -111,8 +110,8 @@ test.suite("Scheduler", function(suite)
     end)
 
     suite:case("throws when scheduling into an unknown phase", function(asserts)
-        local missing_id = identifier.with_default_namespace("missing")
-        local ticker = scheduler.new(new_world())
+        const missing_id = identifier.with_default_namespace("missing")
+        const ticker = scheduler.new(new_world())
 
         asserts.throwsWith(`'{missing_id}' is not a phase`, function()
             ticker:schedule_systems(missing_id, function() end)
@@ -120,8 +119,8 @@ test.suite("Scheduler", function(suite)
     end)
 
     suite:case("does not allow systems to yield", function(asserts)
-        local phase_id = identifier.with_default_namespace("tick")
-        local ticker =
+        const phase_id = identifier.with_default_namespace("tick")
+        const ticker =
             scheduler.new(new_world()):add_phase(scheduler.create_phase_with_systems(phase_id, {
                 function()
                     coroutine.yield()

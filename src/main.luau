@@ -4,18 +4,18 @@
 -- this file should only handle argument parsing and then instantiate whatever
 -- handles this logic
 
-local task = require("@std/task")
-local net = require("@lute/net")
+const task = require("@std/task")
+const net = require("@lute/net")
 
-local world = require("@moonstone/ecs/world")
-local scheduler = require("@moonstone/ecs/systems/scheduler")
-local identifier = require("@moonstone/resources/identifier")
-local logger = require("@moonstone/util/logger")
+const world = require("@moonstone/ecs/world")
+const scheduler = require("@moonstone/ecs/systems/scheduler")
+const identifier = require("@moonstone/resources/identifier")
+const logger = require("@moonstone/util/logger")
 
-local TICK_INTERVAL = 1 / 20
+const TICK_INTERVAL = 1 / 20
 
-local log = logger.new("Main coroutine")
-local ticker = scheduler.new(world)
+const log = logger.new("Main coroutine")
+const ticker = scheduler.new(world)
 
 ticker
     :add_phase(scheduler.create_phase_with_systems(identifier.with_default_namespace("pre"), {}))
@@ -33,8 +33,8 @@ local accumulated = 0
 local last_tick = os.clock()
 
 while true do
-    local start = os.clock()
-    local delta = start - last_tick
+    const start = os.clock()
+    const delta = start - last_tick
 
     last_tick = start
     accumulated += delta
@@ -44,8 +44,8 @@ while true do
         accumulated -= TICK_INTERVAL
     end
 
-    local finish = os.clock()
-    local sleep = TICK_INTERVAL - (finish - start)
+    const finish = os.clock()
+    const sleep = TICK_INTERVAL - (finish - start)
 
     if sleep > 0 then
         task.wait(sleep)

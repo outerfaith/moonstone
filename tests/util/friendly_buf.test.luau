@@ -1,12 +1,12 @@
 --!optimize 2
 --!native
 
-local test = require("@std/test")
+const test = require("@std/test")
 
-local friendly_buf = require("@moonstone/util/friendly_buf")
+const friendly_buf = require("@moonstone/util/friendly_buf")
 
-local function read_all_bytes(buf: buffer): { number }
-    local bytes = {}
+const function read_all_bytes(buf: buffer): { number }
+    const bytes = {}
 
     for i = 0, buffer.len(buf) - 1 do
         table.insert(bytes, buffer.readu8(buf, i))
@@ -17,16 +17,16 @@ end
 
 test.suite("FriendlyBuf", function(suite)
     suite:case("allocate and wrap initialize cursor state", function(asserts)
-        local allocated = friendly_buf.allocate(4)
+        const allocated = friendly_buf.allocate(4)
 
         asserts.eq(4, buffer.len(allocated._buffer))
         asserts.eq(0, allocated.position)
         asserts.eq(4, allocated.limit)
 
-        local raw = buffer.create(3)
+        const raw = buffer.create(3)
         buffer.writeu8(raw, 0, 0xAA)
 
-        local wrapped = friendly_buf.wrap(raw)
+        const wrapped = friendly_buf.wrap(raw)
         asserts.eq(raw, wrapped._buffer)
         asserts.eq(0, wrapped.position)
         asserts.eq(3, wrapped.limit)
@@ -34,7 +34,7 @@ test.suite("FriendlyBuf", function(suite)
     end)
 
     suite:case("round-trips 8-bit integers", function(asserts)
-        local bytes = friendly_buf.allocate(4)
+        const bytes = friendly_buf.allocate(4)
 
         bytes:write_u8(0xAB)
         bytes:write_i8(-2)
@@ -54,7 +54,7 @@ test.suite("FriendlyBuf", function(suite)
     end)
 
     suite:case("round-trips 16-bit integers", function(asserts)
-        local bytes = friendly_buf.allocate(8)
+        const bytes = friendly_buf.allocate(8)
 
         bytes:write_u16(0xC0DE)
         bytes:write_i16(-12345)
@@ -77,7 +77,7 @@ test.suite("FriendlyBuf", function(suite)
     end)
 
     suite:case("round-trips 24-bit integers", function(asserts)
-        local bytes = friendly_buf.allocate(12)
+        const bytes = friendly_buf.allocate(12)
 
         bytes:write_u24(0x123456)
         bytes:write_i24(-1)
@@ -110,7 +110,7 @@ test.suite("FriendlyBuf", function(suite)
     end)
 
     suite:case("round-trips 32-bit integers", function(asserts)
-        local bytes = friendly_buf.allocate(16)
+        const bytes = friendly_buf.allocate(16)
 
         bytes:write_u32(0xDEADBEEF)
         bytes:write_i32(-123456789)
@@ -147,9 +147,9 @@ test.suite("FriendlyBuf", function(suite)
     end)
 
     suite:case("round-trips 64-bit integers", function(asserts)
-        local bytes = friendly_buf.allocate(16)
-        local positive = integer.create(2 ^ 52)
-        local negative = integer.create(-1)
+        const bytes = friendly_buf.allocate(16)
+        const positive = integer.create(2 ^ 52)
+        const negative = integer.create(-1)
 
         bytes:write_i64(positive)
         bytes:write_i64(negative)
@@ -182,7 +182,7 @@ test.suite("FriendlyBuf", function(suite)
     end)
 
     suite:case("round-trips floating point values", function(asserts)
-        local bytes = friendly_buf.allocate(24)
+        const bytes = friendly_buf.allocate(24)
 
         bytes:write_f32(123.5)
         bytes:write_f32(-0.25)
@@ -201,14 +201,14 @@ test.suite("FriendlyBuf", function(suite)
     end)
 
     suite:case("round-trips strings and slices", function(asserts)
-        local bytes = friendly_buf.allocate(16)
-        local raw_slice = buffer.create(3)
+        const bytes = friendly_buf.allocate(16)
+        const raw_slice = buffer.create(3)
 
         buffer.writeu8(raw_slice, 0, 0x11)
         buffer.writeu8(raw_slice, 1, 0x22)
         buffer.writeu8(raw_slice, 2, 0x33)
 
-        local friendly_slice = friendly_buf.allocate(4)
+        const friendly_slice = friendly_buf.allocate(4)
         friendly_slice:write_string("tail")
 
         bytes:write_string("moon")
@@ -240,7 +240,7 @@ test.suite("FriendlyBuf", function(suite)
 
         asserts.eq("moon", bytes:get_string(4))
 
-        local slice = bytes:get_slice(3)
+        const slice = bytes:get_slice(3)
         asserts.eq(0, slice.position)
         asserts.eq(3, slice.limit)
         asserts.eq({ 0x11, 0x22, 0x33 }, read_all_bytes(slice._buffer))
@@ -251,7 +251,7 @@ test.suite("FriendlyBuf", function(suite)
     end)
 
     suite:case("throws when reads and writes exceed limits", function(asserts)
-        local bytes = friendly_buf.allocate(1)
+        const bytes = friendly_buf.allocate(1)
 
         bytes:write_u8(1)
 

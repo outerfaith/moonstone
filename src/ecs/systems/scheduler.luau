@@ -1,9 +1,9 @@
 --!optimize 2
 
-local jecs = require("@vendor/jecs")
+const jecs = require("@vendor/jecs")
 
-local identifier = require("@moonstone/resources/identifier")
-local no_yield = require("@moonstone/util/no_yield")
+const identifier = require("@moonstone/resources/identifier")
+const no_yield = require("@moonstone/util/no_yield")
 
 export type System = (world: jecs.World, tick_delta: number) -> ()
 
@@ -29,24 +29,24 @@ export type Scheduler = setmetatable<{
     read phases: { Phase },
 }, SchedulerProto>
 
-local scheduler = {} :: SchedulerProto
+const scheduler = {} :: SchedulerProto
 scheduler.__index = scheduler
 
-local function new(world: jecs.World): Scheduler
+const function new(world: jecs.World): Scheduler
     return table.freeze(setmetatable({
         world = world,
         phases = {},
     }, scheduler))
 end
 
-local function create_phase_with_systems(id: identifier.Identifier, systems: { System }): Phase
+const function create_phase_with_systems(id: identifier.Identifier, systems: { System }): Phase
     return table.freeze({
         id = id,
         systems = systems,
     })
 end
 
-local function create_phase(id: identifier.Identifier): Phase
+const function create_phase(id: identifier.Identifier): Phase
     return create_phase_with_systems(id, {})
 end
 
@@ -66,8 +66,8 @@ function scheduler.get_phase(self: Scheduler, id)
 end
 
 function scheduler.schedule_systems(self: Scheduler, phase_id, ...: System)
-    local systems = table.freeze({ ... })
-    local phase = assert(self:get_phase(phase_id), `'{phase_id}' is not a phase`)
+    const systems = table.freeze({ ... })
+    const phase = assert(self:get_phase(phase_id), `'{phase_id}' is not a phase`)
 
     for iter_idx, system in ipairs(systems) do
         table.insert(phase.systems, system)

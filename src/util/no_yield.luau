@@ -1,8 +1,8 @@
 --!optimize 2
 
-local function no_yield0<O...>(thread: thread, ok: boolean, ...: O...): O...
+const function no_yield0<O...>(thread: thread, ok: boolean, ...: O...): O...
     if not ok then
-        local message: string = (...) :: any
+        const message: string = (...) :: any
 
         error(debug.traceback(thread, message), 2)
     end
@@ -14,8 +14,8 @@ local function no_yield0<O...>(thread: thread, ok: boolean, ...: O...): O...
     error(debug.traceback(thread, "This coroutine cannot yield"), 2)
 end
 
-local function no_yield<I..., O...>(cb: (I...) -> O..., ...: I...): O...
-    local thread = coroutine.create(cb)
+const function no_yield<I..., O...>(cb: (I...) -> O..., ...: I...): O...
+    const thread = coroutine.create(cb)
 
     return no_yield0(thread, coroutine.resume(thread, ...))
 end

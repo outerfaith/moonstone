@@ -1,9 +1,9 @@
 --!optimize 2
 
-local ESCAPE = "\27"
-local RESET = `{ESCAPE}[0m`
+const ESCAPE = "\27"
+const RESET = `{ESCAPE}[0m`
 
-local STYLES = table.freeze({
+const STYLES = table.freeze({
     RESET = 0,
     BOLD = 1,
     DIM = 2,
@@ -12,7 +12,7 @@ local STYLES = table.freeze({
     BLINK = 5,
 })
 
-local FOREGROUND_COLORS = table.freeze({
+const FOREGROUND_COLORS = table.freeze({
     BLACK = 30,
     RED = 31,
     GREEN = 32,
@@ -24,7 +24,7 @@ local FOREGROUND_COLORS = table.freeze({
     DEFAULT = 39,
 })
 
-local BACKGROUND_COLORS = table.freeze({
+const BACKGROUND_COLORS = table.freeze({
     BLACK = 40,
     RED = 41,
     GREEN = 42,
@@ -36,9 +36,8 @@ local BACKGROUND_COLORS = table.freeze({
     DEFAULT = 49,
 })
 
-@checked
-local function color(foreground: number, background: number?, styles: { number }?)
-    local codes = {}
+const function color(foreground: number, background: number?, styles: { number }?)
+    const codes = {}
     if styles then
         for idx, style in styles do
             table.insert(codes, tostring(style))

@@ -1,9 +1,9 @@
 --!optimize 2
 --!native
 
-local test = require("@std/test")
+const test = require("@std/test")
 
-local identifier = require("@moonstone/resources/identifier")
+const identifier = require("@moonstone/resources/identifier")
 
 test.suite("Identifier", function(suite)
     suite:case("validates namespace and path characters", function(asserts)
@@ -19,9 +19,9 @@ test.suite("Identifier", function(suite)
     end)
 
     suite:case("constructs identifiers with explicit and helper namespaces", function(asserts)
-        local explicit = identifier.new("custom", "widgets/cog")
-        local default = identifier.with_default_namespace("systems/tick")
-        local minecraft = identifier.with_minecraft_namespace("stone")
+        const explicit = identifier.new("custom", "widgets/cog")
+        const default = identifier.with_default_namespace("systems/tick")
+        const minecraft = identifier.with_minecraft_namespace("stone")
 
         asserts.eq("custom", explicit.namespace)
         asserts.eq("widgets/cog", explicit.path)
@@ -37,8 +37,8 @@ test.suite("Identifier", function(suite)
     end)
 
     suite:case("parses minecraft shorthand and namespaced strings", function(asserts)
-        local shorthand = identifier.parse("dirt")
-        local explicit = identifier.parse("moonstone:scheduler/pre")
+        const shorthand = identifier.parse("dirt")
+        const explicit = identifier.parse("moonstone:scheduler/pre")
 
         asserts.eq(identifier.with_minecraft_namespace("dirt"), shorthand)
         asserts.eq("minecraft", shorthand.namespace)
@@ -50,7 +50,7 @@ test.suite("Identifier", function(suite)
     end)
 
     suite:case("derives identifiers without mutating the original", function(asserts)
-        local base = identifier.new("moonstone", "tick")
+        const base = identifier.new("moonstone", "tick")
 
         asserts.eq(identifier.new("moonstone", "post"), base:with_path("post"))
         asserts.eq(identifier.new("moonstone", "server/tick"), base:with_prefix("server/"))
@@ -59,8 +59,8 @@ test.suite("Identifier", function(suite)
     end)
 
     suite:case("formats language keys and short forms", function(asserts)
-        local minecraft = identifier.with_minecraft_namespace("diamond_sword")
-        local custom = identifier.with_default_namespace("scheduler/tick")
+        const minecraft = identifier.with_minecraft_namespace("diamond_sword")
+        const custom = identifier.with_default_namespace("scheduler/tick")
 
         asserts.eq("minecraft.diamond_sword", minecraft:to_language_key())
         asserts.eq("item.minecraft.diamond_sword", minecraft:to_prefixed_language_key("item"))
@@ -82,16 +82,16 @@ test.suite("Identifier", function(suite)
     end)
 
     suite:case("compares by namespace and path only for identifiers", function(asserts)
-        local first = identifier.new("moonstone", "tick")
-        local second = identifier.new("moonstone", "tick")
-        local different_namespace = identifier.new("minecraft", "tick")
-        local different_path = identifier.new("moonstone", "post")
+        const first = identifier.new("moonstone", "tick")
+        const second = identifier.new("moonstone", "tick")
+        const different_namespace = identifier.new("minecraft", "tick")
+        const different_path = identifier.new("moonstone", "post")
 
         asserts.eq(first, second)
         asserts.neq(first, different_namespace)
         asserts.neq(first, different_path)
 
-        local plain_table = { namespace = "moonstone", path = "tick" }
+        const plain_table = { namespace = "moonstone", path = "tick" }
         asserts.that(first ~= (plain_table :: any))
         asserts.that(first ~= ("moonstone:tick" :: any))
     end)

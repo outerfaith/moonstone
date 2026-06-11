@@ -1,8 +1,8 @@
 --!optimize 2
 
-local io = require("@std/io")
+const io = require("@std/io")
 
-local ansi = require("@moonstone/util/ansi")
+const ansi = require("@moonstone/util/ansi")
 
 export type Level = "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL"
 
@@ -21,7 +21,7 @@ export type Logger = setmetatable<{
     read name: string?,
 }, LoggerProto>
 
-local LEVEL_COLORS: { [Level]: number } = table.freeze({
+const LEVEL_COLORS: { [Level]: number } = table.freeze({
     TRACE = ansi.FOREGROUND_COLORS.GREEN,
     DEBUG = ansi.FOREGROUND_COLORS.GREEN,
     INFO = ansi.FOREGROUND_COLORS.GREEN,
@@ -30,33 +30,33 @@ local LEVEL_COLORS: { [Level]: number } = table.freeze({
     FATAL = ansi.FOREGROUND_COLORS.RED,
 } :: any)
 
-local LEVEL_STYLES: { [Level]: { number }? } = table.freeze({
+const LEVEL_STYLES: { [Level]: { number }? } = table.freeze({
     FATAL = { ansi.STYLES.BOLD, ansi.STYLES.BLINK },
 } :: any)
 
-local function get_time_string(): string
-    local time = os.date("*t")
+const function get_time_string(): string
+    const time = os.date("*t")
     return string.format("%02d:%02d:%02d", time.hour, time.min, time.sec)
 end
 
-local logger = {} :: LoggerProto
+const logger = {} :: LoggerProto
 logger.__index = logger
 
-local function new(name: string?): Logger
+const function new(name: string?): Logger
     return table.freeze(setmetatable({ name = name }, logger))
 end
 
 function logger.log(self: Logger, level: Level, msg: string)
-    local color = assert(LEVEL_COLORS[level], `Level '{level}' has no color`)
-    local styles = LEVEL_STYLES[level]
+    const color = assert(LEVEL_COLORS[level], `Level '{level}' has no color`)
+    const styles = LEVEL_STYLES[level]
 
-    local fmt_time = `{ansi.color(ansi.FOREGROUND_COLORS.BLUE)}[{get_time_string()}]{ansi.RESET}`
-    local fmt_level = `{ansi.color(color, nil, styles)}[{level}]{ansi.RESET}`
-    local fmt_name = if self.name ~= nil
+    const fmt_time = `{ansi.color(ansi.FOREGROUND_COLORS.BLUE)}[{get_time_string()}]{ansi.RESET}`
+    const fmt_level = `{ansi.color(color, nil, styles)}[{level}]{ansi.RESET}`
+    const fmt_name = if self.name ~= nil
         then `{ansi.color(ansi.FOREGROUND_COLORS.CYAN)}({self.name}){ansi.RESET} `
         else " "
 
-    local fmt_msg = `{fmt_time} {fmt_level} {fmt_name}{msg}\n`
+    const fmt_msg = `{fmt_time} {fmt_level} {fmt_name}{msg}\n`
 
     io.write(fmt_msg)
 end

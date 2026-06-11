@@ -1,6 +1,6 @@
 --!optimize 2
 
-local jecs = require("@vendor/jecs")
+const jecs = require("@vendor/jecs")
 
 return jecs.world()
 

@@ -1,6 +1,8 @@
 --!optimize 2
 --!native
 
+const assertions = require("@moonstone/util/assertions")
+
 type FriendlyBufProto = {
     __index: FriendlyBufProto,
     get_u8: (self: FriendlyBuf) -> number,
@@ -37,11 +39,10 @@ export type FriendlyBuf = setmetatable<{
     limit: number,
 }, FriendlyBufProto>
 
-local friendly_buf = {} :: FriendlyBufProto
+const friendly_buf = {} :: FriendlyBufProto
 friendly_buf.__index = friendly_buf
 
-@checked
-local function wrap(buf: buffer): FriendlyBuf
+const function wrap(buf: buffer): FriendlyBuf
     return setmetatable({
         _buffer = buf,
         position = 0,
@@ -49,17 +50,15 @@ local function wrap(buf: buffer): FriendlyBuf
     }, friendly_buf)
 end
 
-@checked
-local function allocate(size: number): FriendlyBuf
+const function allocate(size: number): FriendlyBuf
     return wrap(buffer.create(size))
 end
 
-@checked
-local function read_int16(buf: FriendlyBuf, signed: boolean?): number
+const function read_int16(buf: FriendlyBuf, signed: boolean?): number
     assert(buf.position + 2 <= buf.limit, "attempt to read past limit")
 
-    local high = buf:get_u8()
-    local low = buf:get_u8()
+    const high = buf:get_u8()
+    const low = buf:get_u8()
 
     local res = high * 256 + low
     if (res >= 0x8000) and signed then
@@ -69,13 +68,12 @@ local function read_int16(buf: FriendlyBuf, signed: boolean?): number
     return res
 end
 
-@checked
-local function read_int24(buf: FriendlyBuf, signed: boolean?): number
+const function read_int24(buf: FriendlyBuf, signed: boolean?): number
     assert(buf.position + 3 <= buf.limit, "attempt to read past limit")
 
-    local a = buf:get_u8()
-    local b = buf:get_u8()
-    local c = buf:get_u8()
+    const a = buf:get_u8()
+    const b = buf:get_u8()
+    const c = buf:get_u8()
 
     local res = a * 65536 + b * 256 + c
     if (res >= 0x800000) and signed then
@@ -85,14 +83,13 @@ local function read_int24(buf: FriendlyBuf, signed: boolean?): number
     return res
 end
 
-@checked
-local function read_int32(buf: FriendlyBuf, signed: boolean?): number
+const function read_int32(buf: FriendlyBuf, signed: boolean?): number
     assert(buf.position + 4 <= buf.limit, "attempt to read past limit")
 
-    local a = buf:get_u8()
-    local b = buf:get_u8()
-    local c = buf:get_u8()
-    local d = buf:get_u8()
+    const a = buf:get_u8()
+    const b = buf:get_u8()
+    const c = buf:get_u8()
+    const d = buf:get_u8()
 
     local res = a * 16777216 + b * 65536 + c * 256 + d
     if (res >= 0x80000000) and signed then
@@ -102,11 +99,10 @@ local function read_int32(buf: FriendlyBuf, signed: boolean?): number
     return res
 end
 
-@checked
-local function read_reversed(buf: FriendlyBuf, size: number): buffer
+const function read_reversed(buf: FriendlyBuf, size: number): buffer
     assert(buf.position + size <= buf.limit, "attempt to read past limit")
 
-    local out = buffer.create(size)
+    const out = buffer.create(size)
     for i = size - 1, 0, -1 do
         buffer.writeu8(out, i, buf:get_u8())
     end
@@ -114,8 +110,7 @@ local function read_reversed(buf: FriendlyBuf, size: number): buffer
     return out
 end
 
-@checked
-local function write_int16(buf: FriendlyBuf, value: number, signed: boolean?)
+const function write_int16(buf: FriendlyBuf, value: number, signed: boolean?)
     assert(buf.position + 2 <= buf.limit, "attempt to write past limit")
 
     if signed and (value < 0) then
@@ -126,8 +121,7 @@ local function write_int16(buf: FriendlyBuf, value: number, signed: boolean?)
     buf:write_u8(value % 256)
 end
 
-@checked
-local function write_int24(buf: FriendlyBuf, value: number, signed: boolean?)
+const function write_int24(buf: FriendlyBuf, value: number, signed: boolean?)
     assert(buf.position + 3 <= buf.limit, "attempt to write past limit")
 
     if signed and (value < 0) then
@@ -139,8 +133,7 @@ local function write_int24(buf: FriendlyBuf, value: number, signed: boolean?)
     buf:write_u8(value % 256)
 end
 
-@checked
-local function write_int32(buf: FriendlyBuf, value: number, signed: boolean?)
+const function write_int32(buf: FriendlyBuf, value: number, signed: boolean?)
     assert(buf.position + 4 <= buf.limit, "attempt to write past limit")
 
     if signed and (value < 0) then
@@ -153,9 +146,8 @@ local function write_int32(buf: FriendlyBuf, value: number, signed: boolean?)
     buf:write_u8(value % 256)
 end
 
-@checked
-local function write_reversed(buf: FriendlyBuf, value: buffer)
-    local length = buffer.len(value)
+const function write_reversed(buf: FriendlyBuf, value: buffer)
+    const length = buffer.len(value)
     assert(buf.position + length <= buf.limit, "attempt to write past limit")
 
     for i = 0, length - 1 do
@@ -163,8 +155,7 @@ local function write_reversed(buf: FriendlyBuf, value: buffer)
     end
 end
 
-@checked
-local function swap_u32(n: number): number
+const function swap_u32(n: number): number
     return bit32.bor(
         bit32.lshift(bit32.band(n, 0xFF), 24),
         bit32.lshift(bit32.band(n, 0xFF00), 8),
@@ -222,8 +213,8 @@ end
 function friendly_buf.get_i64(self)
     assert(self.position + 8 <= self.limit, "attempt to read past limit")
 
-    local high = integer.create(swap_u32(buffer.readu32(self._buffer, self.position)))
-    local low = integer.create(swap_u32(buffer.readu32(self._buffer, self.position + 4)))
+    const high = integer.create(swap_u32(buffer.readu32(self._buffer, self.position)))
+    const low = integer.create(swap_u32(buffer.readu32(self._buffer, self.position + 4)))
 
     self.position += 8
 
@@ -241,7 +232,7 @@ function friendly_buf.get_slice(self, length)
     assert(length >= 0, "length must be positive")
     assert(self.position + length <= self.limit, "attempt to read past limit")
 
-    local slice = buffer.create(length)
+    const slice = buffer.create(length)
     buffer.copy(slice, 0, self._buffer, self.position, length)
 
     self.position += length
@@ -252,51 +243,51 @@ end
 function friendly_buf.write_u8(self, value)
     assert(self.position + 1 <= self.limit, "attempt to write past limit")
 
-    buffer.writeu8(self._buffer, self.position, value)
+    buffer.writeu8(self._buffer, self.position, assertions.is_u8(value))
     self.position += 1
 end
 
 function friendly_buf.write_i8(self, value)
     assert(self.position + 1 <= self.limit, "attempt to write past limit")
 
-    buffer.writei8(self._buffer, self.position, value)
+    buffer.writei8(self._buffer, self.position, assertions.is_i8(value))
     self.position += 1
 end
 
 function friendly_buf.write_u16(self, value)
-    write_int16(self, value)
+    write_int16(self, assertions.is_u16(value))
 end
 
 function friendly_buf.write_i16(self, value)
-    write_int16(self, value, true)
+    write_int16(self, assertions.is_i16(value), true)
 end
 
 function friendly_buf.write_u24(self, value)
-    write_int24(self, value)
+    write_int24(self, assertions.is_u24(value))
 end
 
 function friendly_buf.write_i24(self, value)
-    write_int24(self, value, true)
+    write_int24(self, assertions.is_i24(value), true)
 end
 
 function friendly_buf.write_u32(self, value)
-    write_int32(self, value)
+    write_int32(self, assertions.is_u32(value))
 end
 
 function friendly_buf.write_i32(self, value)
-    write_int32(self, value, true)
+    write_int32(self, assertions.is_i32(value), true)
 end
 
 function friendly_buf.write_f32(self, value)
-    local temp = buffer.create(4)
-    buffer.writef32(temp, 0, value)
+    const temp = buffer.create(4)
+    buffer.writef32(temp, 0, assertions.is_f32(value))
 
     write_reversed(self, temp)
 end
 
 function friendly_buf.write_f64(self, value)
-    local temp = buffer.create(8)
-    buffer.writef64(temp, 0, value)
+    const temp = buffer.create(8)
+    buffer.writef64(temp, 0, assertions.is_f64(value))
 
     write_reversed(self, temp)
 end
@@ -304,17 +295,17 @@ end
 function friendly_buf.write_i64(self, value)
     assert(self.position + 8 <= self.limit, "attempt to write past limit")
 
-    local mask = integer.create(0xFFFFFFFF)
+    const mask = integer.create(0xFFFFFFFF)
 
-    local high = integer.band(integer.rshift(value, integer.create(32)), mask)
-    local low = integer.band(value, mask)
+    const high = integer.band(integer.rshift(value, integer.create(32)), mask)
+    const low = integer.band(value, mask)
 
     write_int32(self, integer.tonumber(high))
     write_int32(self, integer.tonumber(low))
 end
 
 function friendly_buf.write_string(self, value)
-    local length = string.len(value)
+    const length = string.len(value)
 
     assert(self.position + length <= self.limit, "attempt to write past limit")
 
@@ -323,8 +314,8 @@ function friendly_buf.write_string(self, value)
 end
 
 function friendly_buf.write_slice(self, slice)
-    local src = if type(slice) == "buffer" then slice else slice._buffer
-    local length = buffer.len(src)
+    const src = if type(slice) == "buffer" then slice else slice._buffer
+    const length = buffer.len(src)
 
     assert(self.position + length <= self.limit, "attempt to write past limit")
 
