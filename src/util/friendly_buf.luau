@@ -5,6 +5,7 @@ const assertions = require("@moonstone/util/assertions")
 
 type FriendlyBufProto = {
     __index: FriendlyBufProto,
+    get_remaining: (self: FriendlyBuf) -> number,
     get_u8: (self: FriendlyBuf) -> number,
     get_i8: (self: FriendlyBuf) -> number,
     get_u16: (self: FriendlyBuf) -> number,
@@ -162,6 +163,10 @@ const function swap_u32(n: number): number
         bit32.rshift(bit32.band(n, 0xFF0000), 8),
         bit32.rshift(n, 24)
     )
+end
+
+function friendly_buf.get_remaining(self)
+    return self.limit - self.position
 end
 
 function friendly_buf.get_u8(self)

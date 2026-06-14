@@ -1,5 +1,9 @@
 --!optimize 2
 
+const buffer_codec = require("@moonstone/network/buffer_codec/helper")
+
+type BufferCodec<T> = buffer_codec.BufferCodec<T>
+
 type IdentifierProto = {
     __index: IdentifierProto,
     __tostring: (self: Identifier) -> string,
@@ -89,6 +93,12 @@ const function parse(input: string): Identifier
     return with_minecraft_namespace(input)
 end
 
+const BUFFER_CODEC = buffer_codec.new<<Identifier>>(function(buf)
+    return parse(buffer_codec.UNLIMITED_STRING:read(buf))
+end, function(buf, value)
+    buffer_codec.UNLIMITED_STRING:write(buf, tostring(value))
+end)
+
 function identifier.__tostring(self)
     return `{self.namespace}{NAMESPACE_SEPARATOR}{self.path}`
 end
@@ -138,6 +148,7 @@ function identifier.to_short_string(self)
 end
 
 return table.freeze({
+    BUFFER_CODEC = BUFFER_CODEC,
     is_valid_namespace = is_valid_namespace,
     is_valid_path = is_valid_path,
     new = new,

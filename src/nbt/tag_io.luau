@@ -2,6 +2,7 @@
 
 const tags = require("@moonstone/nbt/tags")
 const tag_ops = require("@moonstone/nbt/tag_ops")
+const buffer_codec = require("@moonstone/network/buffer_codec/helper")
 const friendly_buf = require("@moonstone/util/friendly_buf")
 const lazy_require = require("@moonstone/util/lazy_require")
 
@@ -86,7 +87,14 @@ const function read<T>(buf: FriendlyBuf, named: boolean?): AnyTag<T>
     return ops.read(buf):unwrap()
 end
 
+const BUFFER_CODEC = buffer_codec.new<<Tag<unknown>>>(function(buf)
+    return read(buf) :: Tag<unknown>
+end, function(buf, value)
+    write(buf, value, false)
+end)
+
 return table.freeze({
+    BUFFER_CODEC = BUFFER_CODEC,
     write_payload = write_payload,
     read_payload = read_payload,
     write = write,
