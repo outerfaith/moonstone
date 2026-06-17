@@ -36,21 +36,21 @@ const DISPATCH_TABLE: { read [number]: () -> TagOps<any> } = table.freeze({
     ),
 })
 
-const function write_payload<T>(buf: FriendlyBuf, tag: Tag<T>)
+export function write_payload<T>(buf: FriendlyBuf, tag: Tag<T>)
     const id = tags.assert_tag_id(tag.id)
     const ops = DISPATCH_TABLE[id]()
 
     ops.write(tag :: Tag<T>, buf)
 end
 
-const function read_payload<T>(buf: FriendlyBuf, id: number): Tag<T>
+export function read_payload<T>(buf: FriendlyBuf, id: number): Tag<T>
     const validated_id = tags.assert_tag_id(id)
     const ops = DISPATCH_TABLE[validated_id]()
 
     return ops.read(buf):unwrap()
 end
 
-const function write<T>(buf: FriendlyBuf, tag: AnyTag<T>, preserve_name: boolean?)
+export function write<T>(buf: FriendlyBuf, tag: AnyTag<T>, preserve_name: boolean?)
     const id = tags.assert_tag_id(if tag.id ~= nil then tag.id else (tag.tag :: any).id)
     const ops = DISPATCH_TABLE[id]()
 
@@ -71,7 +71,7 @@ const function write<T>(buf: FriendlyBuf, tag: AnyTag<T>, preserve_name: boolean
     ops.write(tag :: Tag<T>, buf)
 end
 
-const function read<T>(buf: FriendlyBuf, named: boolean?): AnyTag<T>
+export function read<T>(buf: FriendlyBuf, named: boolean?): AnyTag<T>
     const id = tags.assert_tag_id(buf:get_u8())
     const ops = DISPATCH_TABLE[id]()
 
@@ -87,19 +87,11 @@ const function read<T>(buf: FriendlyBuf, named: boolean?): AnyTag<T>
     return ops.read(buf):unwrap()
 end
 
-const BUFFER_CODEC = buffer_codec.new<<Tag<unknown>>>(function(buf)
+export const BUFFER_CODEC = buffer_codec.new<<Tag<unknown>>>(function(buf)
     return read(buf) :: Tag<unknown>
 end, function(buf, value)
     write(buf, value, false)
 end)
-
-return table.freeze({
-    BUFFER_CODEC = BUFFER_CODEC,
-    write_payload = write_payload,
-    read_payload = read_payload,
-    write = write,
-    read = read,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

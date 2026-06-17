@@ -11,23 +11,18 @@ type Tag<T> = tag_ops.Tag<T>
 type TagOps<T> = tag_ops.TagOps<T>
 type FriendlyBuf = friendly_buf.FriendlyBuf
 
-const function write(tag: Tag<number>, buf: FriendlyBuf)
+export function write(tag: Tag<number>, buf: FriendlyBuf)
     assert(tag.value ~= nil and tag.id ~= nil, "not a valid tag")
     assert(tag.id == tags.TAG_DOUBLE, "not a double tag")
 
     buf:write_f64(tag.value)
 end
 
-const function read(buf: FriendlyBuf): Result<Tag<number>, string>
+export function read(buf: FriendlyBuf): Result<Tag<number>, string>
     const value = buf:get_f64()
 
     return result.ok(tags.double(value))
 end
-
-return table.freeze({
-    write = write,
-    read = read,
-}) :: TagOps<number>
 
 --[[
    Copyright 2025-2026 Outerfaith

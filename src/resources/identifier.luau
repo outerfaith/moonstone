@@ -36,7 +36,7 @@ const PATH_PATTERN = "[a-z0-9/%.%_%-]"
 const identifier = {} :: IdentifierProto
 identifier.__index = identifier
 
-const function is_valid_namespace(namespace: string): boolean
+export function is_valid_namespace(namespace: string): boolean
     for i = 1, string.len(namespace) do
         const char = string.sub(namespace, i, i)
 
@@ -48,7 +48,7 @@ const function is_valid_namespace(namespace: string): boolean
     return true
 end
 
-const function is_valid_path(path: string): boolean
+export function is_valid_path(path: string): boolean
     for i = 1, string.len(path) do
         const char = string.sub(path, i, i)
 
@@ -60,7 +60,7 @@ const function is_valid_path(path: string): boolean
     return true
 end
 
-const function new(namespace: string, path: string): Identifier
+export function new(namespace: string, path: string): Identifier
     assert(is_valid_namespace(namespace), "namespace contains invalid characters")
     assert(is_valid_path(path), "path contains invalid characters")
 
@@ -70,15 +70,15 @@ const function new(namespace: string, path: string): Identifier
     }, identifier)) :: any
 end
 
-const function with_default_namespace(path: string): Identifier
+export function with_default_namespace(path: string): Identifier
     return new(DEFAULT_NAMESPACE, path)
 end
 
-const function with_minecraft_namespace(path: string): Identifier
+export function with_minecraft_namespace(path: string): Identifier
     return new(MINECRAFT_NAMESPACE, path)
 end
 
-const function parse(input: string): Identifier
+export function parse(input: string): Identifier
     const separator = string.find(input, NAMESPACE_SEPARATOR, 1, true)
 
     if separator ~= nil then
@@ -93,7 +93,7 @@ const function parse(input: string): Identifier
     return with_minecraft_namespace(input)
 end
 
-const BUFFER_CODEC = buffer_codec.new<<Identifier>>(function(buf)
+export const BUFFER_CODEC = buffer_codec.new<<Identifier>>(function(buf)
     return parse(buffer_codec.UNLIMITED_STRING:read(buf))
 end, function(buf, value)
     buffer_codec.UNLIMITED_STRING:write(buf, tostring(value))
@@ -146,16 +146,6 @@ end
 function identifier.to_short_string(self)
     return self.namespace == MINECRAFT_NAMESPACE and self.path or self:__tostring()
 end
-
-return table.freeze({
-    BUFFER_CODEC = BUFFER_CODEC,
-    is_valid_namespace = is_valid_namespace,
-    is_valid_path = is_valid_path,
-    new = new,
-    parse = parse,
-    with_default_namespace = with_default_namespace,
-    with_minecraft_namespace = with_minecraft_namespace,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

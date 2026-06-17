@@ -2,7 +2,7 @@
 
 const buffer_codec = require("@moonstone/network/buffer_codec")
 
-const VAR_INT = buffer_codec.new<<number>>(function(buf)
+export const VAR_INT = buffer_codec.new<<number>>(function(buf)
     local result = 0
     local shift = 0
 
@@ -30,7 +30,7 @@ end, function(buf, value)
     buf:write_u8(remaining)
 end)
 
-const VAR_LONG = buffer_codec.new<<integer>>(function(buf)
+export const VAR_LONG = buffer_codec.new<<integer>>(function(buf)
     local result = 0i
     local shift = 0
 
@@ -57,11 +57,6 @@ end, function(buf, value)
     end
     buf:write_u8(integer.tonumber(remaining))
 end)
-
-return table.freeze({
-    VAR_INT = VAR_INT,
-    VAR_LONG = VAR_LONG,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

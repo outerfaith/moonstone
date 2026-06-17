@@ -42,7 +42,7 @@ type OptionalBufferCodec<T> = setmetatable<{
 const buffer_codec = {} :: BufferCodecProto<unknown>
 buffer_codec.__index = buffer_codec
 
-const function new_buffer_codec<T>(
+export function new<T>(
     reader: (buf: FriendlyBuf) -> T,
     writer: (buf: FriendlyBuf, value: T) -> ()
 ): BufferCodec<T>
@@ -79,7 +79,7 @@ function buffer_codec.write_at_offset(self, buf, value, offset)
 end
 
 function buffer_codec.as_optional(self)
-    return new_buffer_codec(function(buf)
+    return new(function(buf)
         const is_present = buf:get_u8()
         if is_present == 0 then
             return nil
@@ -96,10 +96,6 @@ function buffer_codec.as_optional(self)
         self:write(buf, value)
     end) :: any
 end
-
-return table.freeze({
-    new = new_buffer_codec,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

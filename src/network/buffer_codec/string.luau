@@ -6,7 +6,7 @@ const assertions = require("@moonstone/util/assertions")
 
 type BufferCodec<T> = buffer_codec.BufferCodec<T>
 
-const function limited(max_length: number): BufferCodec<string>
+export function limited(max_length: number): BufferCodec<string>
     assertions.range(max_length, 1, 32767, "max length must be at least 1 and at most 32767")
 
     const max_bytes = max_length * 4
@@ -38,12 +38,7 @@ const function limited(max_length: number): BufferCodec<string>
     end)
 end
 
-const UNLIMITED = limited(32767)
-
-return table.freeze({
-    UNLIMITED = UNLIMITED,
-    limited = limited,
-})
+export const UNLIMITED = limited(32767)
 
 --[[
    Copyright 2025-2026 Outerfaith

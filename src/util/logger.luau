@@ -34,7 +34,7 @@ const LEVEL_STYLES: { [Level]: { number }? } = table.freeze({
     FATAL = { ansi.STYLES.BOLD, ansi.STYLES.BLINK },
 } :: any)
 
-const function get_time_string(): string
+export function get_time_string(): string
     const time = os.date("*t")
     return string.format("%02d:%02d:%02d", time.hour, time.min, time.sec)
 end
@@ -42,7 +42,7 @@ end
 const logger = {} :: LoggerProto
 logger.__index = logger
 
-const function new(name: string?): Logger
+export function new(name: string?): Logger
     return table.freeze(setmetatable({ name = name }, logger))
 end
 
@@ -84,10 +84,6 @@ end
 function logger.fatal(self: Logger, msg: string)
     self:log("FATAL", msg)
 end
-
-return table.freeze({
-    new = new,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

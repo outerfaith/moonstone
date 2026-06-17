@@ -43,7 +43,7 @@ export type FriendlyBuf = setmetatable<{
 const friendly_buf = {} :: FriendlyBufProto
 friendly_buf.__index = friendly_buf
 
-const function wrap(buf: buffer): FriendlyBuf
+export function wrap(buf: buffer): FriendlyBuf
     return setmetatable({
         _buffer = buf,
         position = 0,
@@ -51,7 +51,7 @@ const function wrap(buf: buffer): FriendlyBuf
     }, friendly_buf)
 end
 
-const function allocate(size: number): FriendlyBuf
+export function allocate(size: number): FriendlyBuf
     return wrap(buffer.create(size))
 end
 
@@ -327,11 +327,6 @@ function friendly_buf.write_slice(self, slice)
     buffer.copy(self._buffer, self.position, src, 0, length)
     self.position += length
 end
-
-return table.freeze({
-    wrap = wrap,
-    allocate = allocate,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

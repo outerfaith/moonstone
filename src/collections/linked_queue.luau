@@ -23,7 +23,7 @@ export type LinkedQueue<T> = setmetatable<{
 const linked_queue = {} :: LinkedQueueProto<unknown>
 linked_queue.__index = linked_queue
 
-const function new_linked_queue<T>(): LinkedQueue<T>
+export function new<T>(): LinkedQueue<T>
     return setmetatable({
         head = nil,
         tail = nil,
@@ -87,10 +87,6 @@ end
 function linked_queue.is_empty(self)
     return self.head == nil
 end
-
-return table.freeze({
-    new = new_linked_queue,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

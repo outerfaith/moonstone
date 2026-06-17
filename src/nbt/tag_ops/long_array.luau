@@ -11,7 +11,7 @@ type Tag<T> = tag_ops.Tag<T>
 type TagOps<T> = tag_ops.TagOps<T>
 type FriendlyBuf = friendly_buf.FriendlyBuf
 
-const function write(tag: Tag<{ integer }>, buf: FriendlyBuf)
+export function write(tag: Tag<{ integer }>, buf: FriendlyBuf)
     assert(tag.value ~= nil and tag.id ~= nil, "not a valid tag")
     assert(tag.id == tags.TAG_LONG_ARRAY, "not a long array tag")
 
@@ -21,7 +21,7 @@ const function write(tag: Tag<{ integer }>, buf: FriendlyBuf)
     end
 end
 
-const function read(buf: FriendlyBuf): Result<Tag<{ integer }>, string>
+export function read(buf: FriendlyBuf): Result<Tag<{ integer }>, string>
     const length = buf:get_i32()
     if length < 0 then
         return result.err("length must be non-negative")
@@ -36,11 +36,6 @@ const function read(buf: FriendlyBuf): Result<Tag<{ integer }>, string>
 
     return result.ok(tags.long_array(read :: { integer }))
 end
-
-return table.freeze({
-    write = write,
-    read = read,
-}) :: TagOps<{ integer }>
 
 --[[
    Copyright 2025-2026 Outerfaith

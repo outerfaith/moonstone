@@ -11,7 +11,7 @@ type Tag<T> = tag_ops.Tag<T>
 type TagOps<T> = tag_ops.TagOps<T>
 type FriendlyBuf = friendly_buf.FriendlyBuf
 
-const function write(tag: Tag<string>, buf: FriendlyBuf)
+export function write(tag: Tag<string>, buf: FriendlyBuf)
     assert(tag.value ~= nil and tag.id ~= nil, "not a valid tag")
     assert(tag.id == tags.TAG_STRING, "not a string tag")
 
@@ -21,17 +21,12 @@ const function write(tag: Tag<string>, buf: FriendlyBuf)
     buf:write_string(tag.value)
 end
 
-const function read(buf: FriendlyBuf): Result<Tag<string>, string>
+export function read(buf: FriendlyBuf): Result<Tag<string>, string>
     const length = buf:get_u16()
     const value = buf:get_string(length)
 
     return result.ok(tags.str(value))
 end
-
-return table.freeze({
-    write = write,
-    read = read,
-}) :: TagOps<string>
 
 --[[
    Copyright 2025-2026 Outerfaith

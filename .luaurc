@@ -7,5 +7,10 @@
         "pkg": "./luau_packages",
         "vendor": "./vendor",
         "moonstone": "./src"
+    },
+    "lint": {
+        "*": true,
+        "FunctionUnused": false,
+        "LocalUnused": false
     }
 }

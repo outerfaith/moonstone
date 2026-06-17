@@ -1,9 +1,9 @@
 --!optimize 2
 
-const ESCAPE = "\27"
-const RESET = `{ESCAPE}[0m`
+export const ESCAPE = "\27"
+export const RESET = `{ESCAPE}[0m`
 
-const STYLES = table.freeze({
+export const STYLES = table.freeze({
     RESET = 0,
     BOLD = 1,
     DIM = 2,
@@ -12,7 +12,7 @@ const STYLES = table.freeze({
     BLINK = 5,
 })
 
-const FOREGROUND_COLORS = table.freeze({
+export const FOREGROUND_COLORS = table.freeze({
     BLACK = 30,
     RED = 31,
     GREEN = 32,
@@ -24,7 +24,7 @@ const FOREGROUND_COLORS = table.freeze({
     DEFAULT = 39,
 })
 
-const BACKGROUND_COLORS = table.freeze({
+export const BACKGROUND_COLORS = table.freeze({
     BLACK = 40,
     RED = 41,
     GREEN = 42,
@@ -36,7 +36,7 @@ const BACKGROUND_COLORS = table.freeze({
     DEFAULT = 49,
 })
 
-const function color(foreground: number, background: number?, styles: { number }?)
+export function color(foreground: number, background: number?, styles: { number }?)
     const codes = {}
     if styles then
         for idx, style in styles do
@@ -52,15 +52,6 @@ const function color(foreground: number, background: number?, styles: { number }
     end
     return `{ESCAPE}[{table.concat(codes, ";")}m`
 end
-
-return table.freeze({
-    ESCAPE = ESCAPE,
-    RESET = RESET,
-    STYLES = STYLES,
-    FOREGROUND_COLORS = FOREGROUND_COLORS,
-    BACKGROUND_COLORS = BACKGROUND_COLORS,
-    color = color,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

@@ -7,7 +7,7 @@ const friendly_buf = require("@moonstone/util/friendly_buf")
 type BufferCodec<T> = buffer_codec.BufferCodec<T>
 type FriendlyBuf = friendly_buf.FriendlyBuf
 
-const BYTE_ARRAY = buffer_codec.new<<FriendlyBuf>>(function(buf)
+export const BYTE_ARRAY = buffer_codec.new<<FriendlyBuf>>(function(buf)
     const length = variable_sized.VAR_INT:read(buf)
     const bytes = buf:get_slice(length)
 
@@ -17,13 +17,13 @@ end, function(buf, value)
     buf:write_slice(value)
 end)
 
-const TERMINATING_BYTE_ARRAY = buffer_codec.new<<FriendlyBuf>>(function(buf)
+export const TERMINATING_BYTE_ARRAY = buffer_codec.new<<FriendlyBuf>>(function(buf)
     return buf:get_slice(buf:get_remaining())
 end, function(buf, value)
     buf:write_slice(value)
 end)
 
-const function array<T>(codec: BufferCodec<T>)
+export function array<T>(codec: BufferCodec<T>)
     return buffer_codec.new<<{ T }>>(function(buf)
         const length = variable_sized.VAR_INT:read(buf)
         const result = table.create(length)
@@ -42,12 +42,6 @@ const function array<T>(codec: BufferCodec<T>)
         end
     end)
 end
-
-return table.freeze({
-    BYTE_ARRAY = BYTE_ARRAY,
-    TERMINATING_BYTE_ARRAY = TERMINATING_BYTE_ARRAY,
-    array = array,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

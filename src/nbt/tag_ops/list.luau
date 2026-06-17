@@ -13,7 +13,7 @@ type ListTag<T> = tag_ops.ListTag<T>
 type TagOps<T> = tag_ops.TagOps<T>
 type FriendlyBuf = friendly_buf.FriendlyBuf
 
-const function write<T>(tag: ListTag<{ Tag<T> }>, buf: FriendlyBuf)
+export function write<T>(tag: ListTag<{ Tag<T> }>, buf: FriendlyBuf)
     assert(tag.value ~= nil and tag.id ~= nil, "not a valid tag")
     assert(tag.id == tags.TAG_LIST, "not a list tag")
 
@@ -32,7 +32,7 @@ const function write<T>(tag: ListTag<{ Tag<T> }>, buf: FriendlyBuf)
     end
 end
 
-const function read<T>(buf: FriendlyBuf): Result<ListTag<{ Tag<T> }>, string>
+export function read<T>(buf: FriendlyBuf): Result<ListTag<{ Tag<T> }>, string>
     const element_id = buf:get_u8()
     const length = buf:get_i32()
     if length < 0 then
@@ -49,11 +49,6 @@ const function read<T>(buf: FriendlyBuf): Result<ListTag<{ Tag<T> }>, string>
 
     return result.ok(tags.list(read :: any, element_id))
 end
-
-return table.freeze({
-    write = write,
-    read = read,
-}) :: TagOps<{ unknown }>
 
 --[[
    Copyright 2025-2026 Outerfaith

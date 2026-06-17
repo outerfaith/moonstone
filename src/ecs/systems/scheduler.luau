@@ -32,21 +32,21 @@ export type Scheduler = setmetatable<{
 const scheduler = {} :: SchedulerProto
 scheduler.__index = scheduler
 
-const function new(world: jecs.World): Scheduler
+export function new(world: jecs.World): Scheduler
     return table.freeze(setmetatable({
         world = world,
         phases = {},
     }, scheduler))
 end
 
-const function create_phase_with_systems(id: identifier.Identifier, systems: { System }): Phase
+export function create_phase_with_systems(id: identifier.Identifier, systems: { System }): Phase
     return table.freeze({
         id = id,
         systems = systems,
     })
 end
 
-const function create_phase(id: identifier.Identifier): Phase
+export function create_phase(id: identifier.Identifier): Phase
     return create_phase_with_systems(id, {})
 end
 
@@ -83,12 +83,6 @@ function scheduler.tick(self: Scheduler, tick_delta)
         end
     end
 end
-
-return table.freeze({
-    new = new,
-    create_phase_with_systems = create_phase_with_systems,
-    create_phase = create_phase,
-})
 
 --[[
    Copyright 2025-2026 Outerfaith

@@ -13,7 +13,7 @@ type TagOps<T> = tag_ops.TagOps<T>
 type NamedTag<T> = tag_ops.NamedTag<T>
 type FriendlyBuf = friendly_buf.FriendlyBuf
 
-const function write(tag: Tag<{ NamedTag<any> }>, buf: FriendlyBuf)
+export function write(tag: Tag<{ NamedTag<any> }>, buf: FriendlyBuf)
     assert(tag.value ~= nil and tag.id ~= nil, "not a valid tag")
     assert(tag.id == tags.TAG_COMPOUND, "not a compound tag")
 
@@ -23,7 +23,7 @@ const function write(tag: Tag<{ NamedTag<any> }>, buf: FriendlyBuf)
     buf:write_u8(tags.TAG_END)
 end
 
-const function read(buf: FriendlyBuf): Result<Tag<{ NamedTag<any> }>, string>
+export function read(buf: FriendlyBuf): Result<Tag<{ NamedTag<any> }>, string>
     const read = {}
 
     while true do
@@ -38,11 +38,6 @@ const function read(buf: FriendlyBuf): Result<Tag<{ NamedTag<any> }>, string>
 
     return result.ok(tags.compound(read))
 end
-
-return table.freeze({
-    write = write,
-    read = read,
-}) :: TagOps<{ NamedTag<any> }>
 
 --[[
    Copyright 2025-2026 Outerfaith
