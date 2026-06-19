@@ -20,6 +20,7 @@ type AnyTag<T> = {
 }
 
 const DISPATCH_TABLE: { read [number]: () -> TagOps<any> } = table.freeze({
+    [tags.TAG_END] = lazy_require<<TagOps<nil>>>("@moonstone/nbt/tag_ops/end"),
     [tags.TAG_BYTE] = lazy_require<<TagOps<number>>>("@moonstone/nbt/tag_ops/byte"),
     [tags.TAG_SHORT] = lazy_require<<TagOps<number>>>("@moonstone/nbt/tag_ops/short"),
     [tags.TAG_INT] = lazy_require<<TagOps<number>>>("@moonstone/nbt/tag_ops/int"),

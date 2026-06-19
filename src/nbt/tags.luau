@@ -35,6 +35,10 @@ export function named<T>(name: string, tag: ListTag<T> | Tag<T>): NamedTag<T>
     return table.freeze({ name = name, tag = tag })
 end
 
+export function end_tag(): Tag<nil>
+    return tag(TAG_END, nil)
+end
+
 export function byte(value: number): Tag<number>
     return tag(TAG_BYTE, assertions.is_i8(value))
 end

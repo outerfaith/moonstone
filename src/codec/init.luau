@@ -103,6 +103,94 @@ export function validate<T>(codec: Codec<T>, check: (T) -> DataResult<T>): Codec
     return flat_xmap(codec, check, check)
 end
 
+export const BOOLEAN = new<<boolean, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_boolean(value))
+end, function(transcoder, result)
+    return transcoder:get_boolean(result)
+end)
+
+export const BYTE = new<<number, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_i8(value))
+end, function(transcoder, result)
+    return transcoder:get_i8(result)
+end)
+
+export const SHORT = new<<number, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_i16(value))
+end, function(transcoder, result)
+    return transcoder:get_i16(result)
+end)
+
+export const INT = new<<number, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_i32(value))
+end, function(transcoder, result)
+    return transcoder:get_i32(result)
+end)
+
+export const LONG = new<<integer, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_i64(value))
+end, function(transcoder, result)
+    return transcoder:get_i64(result)
+end)
+
+export const FLOAT = new<<number, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_f32(value))
+end, function(transcoder, result)
+    return transcoder:get_f32(result)
+end)
+
+export const DOUBLE = new<<number, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_f64(value))
+end, function(transcoder, result)
+    return transcoder:get_f64(result)
+end)
+
+export const STRING = new<<string, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_string(value))
+end, function(transcoder, result)
+    return transcoder:get_string(result)
+end)
+
+export const BYTE_ARRAY = new<<{ number }, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_i8_array(value))
+end, function(transcoder, result)
+    return transcoder:get_i8_array(result)
+end)
+
+export const INT_ARRAY = new<<{ number }, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_i32_array(value))
+end, function(transcoder, result)
+    return transcoder:get_i32_array(result)
+end)
+
+export const LONG_ARRAY = new<<{ integer }, unknown>>(function(transcoder, value)
+    assert(value ~= nil, "value cannot be nil")
+
+    return data_result.ok(transcoder:create_i64_array(value))
+end, function(transcoder, result)
+    return transcoder:get_i64_array(result)
+end)
+
 --[[
    Copyright 2025-2026 Outerfaith
                   Contributors
