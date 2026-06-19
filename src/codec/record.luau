@@ -10,12 +10,13 @@ export type Field<T> = {
     read name: string,
     read codec: Codec<T>,
     read optional: boolean,
+    read default: T?,
 }
 
 type RecordCodecProto<T> = {
     __index: RecordCodecProto<T>,
     field: <C>(self: RecordCodec<T>, name: string, codec: Codec<C>) -> RecordCodec<T>,
-    optional: <C>(self: RecordCodec<T>, name: string, codec: Codec<C>) -> RecordCodec<T>,
+    optional: <C>(self: RecordCodec<T>, name: string, codec: Codec<C>, default: C?) -> RecordCodec<T>,
     build: (self: RecordCodec<T>) -> Codec<T>,
 }
 
@@ -30,11 +31,12 @@ export function new<T>(): RecordCodec<T>
     return table.freeze(setmetatable({ fields = {} }, record_codec) :: any)
 end
 
-const function new_field<T>(name: string, codec: Codec<T>, optional: boolean): Field<T>
+const function new_field<T>(name: string, codec: Codec<T>, optional: boolean, default: T?): Field<T>
     return table.freeze({
         name = name,
         codec = codec,
         optional = optional,
+        default = default
     })
 end
 
@@ -44,8 +46,8 @@ function record_codec.field<C>(self, name, codec)
     return self
 end
 
-function record_codec.optional<C>(self, name, codec)
-    table.insert(self.fields, new_field<<C>>(name, codec, true))
+function record_codec.optional<C>(self, name, codec, default)
+    table.insert(self.fields, new_field<<C>>(name, codec, true, default))
 
     return self
 end
@@ -59,6 +61,9 @@ function record_codec.build(self)
         const dict = {}
         for idx, field in self.fields do
             if value[field.name] == nil and field.optional then
+                if field.default ~= nil then 
+                    dict[field.name] = field.default :: any
+                end
                 continue
             elseif value[field.name] == nil then
                 return data_result.err(`required field '{field.name}' is not present`)
@@ -85,6 +90,9 @@ function record_codec.build(self)
             const encoded_field = dict.value[field.name]
             if encoded_field == nil then
                 if field.optional then
+                    if field.default ~= nil then 
+                        decoded[field.name] = field.default
+                    end
                     continue
                 end
 

@@ -1,5 +1,6 @@
 --!optimize 2
 
+const codec = require("@moonstone/codec")
 const buffer_codec = require("@moonstone/network/buffer_codec/helper")
 
 type BufferCodec<T> = buffer_codec.BufferCodec<T>
@@ -92,6 +93,8 @@ export function parse(input: string): Identifier
 
     return with_minecraft_namespace(input)
 end
+
+export const CODEC = codec.xmap(codec.STRING, parse, tostring)
 
 export const BUFFER_CODEC = buffer_codec.new<<Identifier>>(function(buf)
     return parse(buffer_codec.UNLIMITED_STRING:read(buf))

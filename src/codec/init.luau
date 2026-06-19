@@ -99,6 +99,59 @@ export function flat_xmap<T, U, D>(
     end)
 end
 
+export function union<T>(a: Codec<T>, b: Codec<T>): Codec<T>
+    return new<<T>>(function(transcoder, value)
+        const first = a.encode(transcoder, value)
+        if first:is_success() then
+            return first
+        end
+
+        return b.encode(transcoder, value)
+    end, function(transcoder, value)
+        const first = a.decode(transcoder, value)
+        if first:is_success() then
+            return first
+        end
+
+        return b.decode(transcoder, value)
+    end)
+end
+
+export function list<T>(codec: Codec<T>): Codec<{T}>
+    return new<<{T}, unknown>>(function(transcoder, value)
+        assert(value ~= nil, "value cannot be nil")
+
+        const encoded: { T } = table.create(#value)
+        for idx, entry in value do 
+            const result = codec.encode(transcoder, entry)
+            if result:is_error() then
+                return result
+            end
+
+            table.insert(encoded, result.value)
+        end
+
+        return data_result.ok(transcoder:create_array(encoded))
+    end, function(transcoder, value)
+        const array = transcoder:get_array(value)
+        if array:is_error() then
+            return array
+        end
+
+        const decoded = table.create(#array.value :: any)
+        for idx, entry in array.value :: any do
+            const result = codec.decode(transcoder, entry)
+            if result:is_error() then
+                return result
+            end
+
+            table.insert(decoded, result.value)
+        end
+
+        return data_result.ok(decoded)
+    end)
+end
+
 export function validate<T>(codec: Codec<T>, check: (T) -> DataResult<T>): Codec<T>
     return flat_xmap(codec, check, check)
 end
