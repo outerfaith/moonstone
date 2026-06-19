@@ -16,7 +16,7 @@ dependencies {
 }
 
 minecraft {
-    version("26.1.2")
+    version("26.2")
     runs {
         server("codegenServer") {
             mainClass("dev.outerfaith.moonstone.codegen.MainKt")
