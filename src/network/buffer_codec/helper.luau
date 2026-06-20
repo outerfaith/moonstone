@@ -29,8 +29,8 @@ const function struct<T>(t: { { string | BufferCodec<unknown> } }): BufferCodec<
         return result
     end, function(buf, v)
         for idx, entry in ipairs(t) do
-            const name = entry[1] :: string
-            const codec = entry[2] :: BufferCodec<unknown>
+            const name = entry[2] :: string
+            const codec = entry[1] :: BufferCodec<unknown>
 
             const value = (v :: { read [string]: unknown })[name]
 
