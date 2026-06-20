@@ -58,7 +58,7 @@ test.suite("String buffer codecs", function(suite)
             codec:read(helpers.buf_from_bytes({ 0x04, 0x66, 0x6F, 0x75, 0x72 }))
         end)
 
-        asserts.throwsWith("string must be at most most 12 bytes", function()
+        asserts.throwsWith("string must be at most 12 bytes", function()
             codec:read(helpers.buf_from_bytes({ 0x0D }))
         end)
     end)

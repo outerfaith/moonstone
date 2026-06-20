@@ -8,7 +8,7 @@ const tag_ops = require("@moonstone/nbt/tag_ops")
 type Result<R, E> = result.Result<R, E>
 type Tag<T> = tag_ops.Tag<T>
 
-export function write(tag: Tag<number>)
+export function write(tag: Tag<nil>)
     return
 end
 

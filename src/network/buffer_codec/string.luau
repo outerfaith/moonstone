@@ -13,7 +13,7 @@ export function limited(max_length: number): BufferCodec<string>
 
     return buffer_codec.new<<string>>(function(buf)
         const length = variable_sized.VAR_INT:read(buf)
-        assertions.range(length, 0, max_bytes, `string must be at most most {max_bytes} bytes`)
+        assertions.range(length, 0, max_bytes, `string must be at most {max_bytes} bytes`)
 
         const str = buf:get_string(length)
 
