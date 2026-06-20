@@ -9,7 +9,7 @@ const handler = require("@moonstone/network/protocol/handler")
 const packet = require("@moonstone/network/protocol/packet")
 const handshake = require("@moonstone/network/protocol/handshake/serverbound/handshake_packet")
 const enum = require("@moonstone/util/enum")
-local logger = require("@moonstone/util/logger")
+const logger = require("@moonstone/util/logger")
 
 type Entity = jecs.Entity
 type PacketHandler = handler.PacketHandler

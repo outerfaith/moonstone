@@ -2,7 +2,7 @@
 
 const tableext = require("@std/tableext")
 
-local jecs = require("@vendor/jecs")
+const jecs = require("@vendor/jecs")
 const typeforge = require("@vendor/typeforge")
 
 const world = require("@moonstone/ecs/world")
@@ -10,8 +10,9 @@ const deep_clone = require("@moonstone/util/deep_clone")
 
 type Id<T> = jecs.Id<T>
 type Entity = jecs.Entity
+type Partial<T> = typeforge.Partial<T>
 
-const function patch<T>(entity: Entity, component: Id<T>, data: T, patch: typeforge.Partial<T>)
+const function patch<T>(entity: Entity, component: Id<T>, data: T, patch: Partial<T>)
     const new_data = tableext.combine(deep_clone(data), patch)
 
     world:set(entity, component, new_data)
