@@ -54,7 +54,7 @@ function logger.log(self: Logger, level: Level, msg: string)
     const fmt_level = `{ansi.color(color, nil, styles)}[{level}]{ansi.RESET}`
     const fmt_name = if self.name ~= nil
         then `{ansi.color(ansi.FOREGROUND_COLORS.CYAN)}({self.name}){ansi.RESET} `
-        else " "
+        else ""
 
     const fmt_msg = `{fmt_time} {fmt_level} {fmt_name}{msg}\n`
 
