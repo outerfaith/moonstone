@@ -14,6 +14,31 @@ const function unit<T>()
     end, function() end)
 end
 
+const function struct<T>(t: { { string | BufferCodec<unknown> } }): BufferCodec<T>
+    return buffer_codec.new(function(buf)
+        const result = {}
+        for idx, entry in ipairs(t) do
+            const name = entry[2] :: string
+            const codec = entry[1] :: BufferCodec<unknown>
+
+            const read = codec:read(buf)
+
+            result[name] = read
+        end
+
+        return result
+    end, function(buf, v)
+        for idx, entry in ipairs(t) do
+            const name = entry[1] :: string
+            const codec = entry[2] :: BufferCodec<unknown>
+
+            const value = (v :: { read [string]: unknown })[name]
+
+            codec:write(buf, value)
+        end
+    end)
+end
+
 return table.freeze({
     BOOLEAN = primitive_codecs.BOOLEAN,
     BYTE = primitive_codecs.BYTE,
@@ -33,6 +58,7 @@ return table.freeze({
     array = arrays.array,
     new = buffer_codec.new,
     unit = unit,
+    struct = struct,
 })
 
 --[[

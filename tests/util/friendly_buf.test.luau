@@ -250,6 +250,112 @@ test.suite("FriendlyBuf", function(suite)
         asserts.eq(16, bytes.position)
     end)
 
+    suite:case("extends without reallocating when capacity is available", function(asserts)
+        const bytes = friendly_buf.allocate(6)
+        const original_buffer = bytes._buffer
+        const raw = buffer.create(2)
+
+        buffer.writeu8(raw, 0, 0xCC)
+        buffer.writeu8(raw, 1, 0xDD)
+
+        bytes:write_u8(0xAA)
+        bytes:write_u8(0xBB)
+        bytes:extend(raw)
+
+        asserts.eq(original_buffer, bytes._buffer)
+        asserts.eq(4, bytes.position)
+        asserts.eq(6, bytes.limit)
+        asserts.eq({ 0xAA, 0xBB, 0xCC, 0xDD, 0x00, 0x00 }, read_all_bytes(bytes._buffer))
+    end)
+
+    suite:case("extends by growing to the next power of two", function(asserts)
+        const bytes = friendly_buf.allocate(4)
+        const raw = buffer.create(3)
+
+        buffer.writeu8(raw, 0, 0x04)
+        buffer.writeu8(raw, 1, 0x05)
+        buffer.writeu8(raw, 2, 0x06)
+
+        bytes:write_u8(0x01)
+        bytes:write_u8(0x02)
+        bytes:write_u8(0x03)
+        bytes:extend(raw)
+
+        asserts.eq(6, bytes.position)
+        asserts.eq(8, bytes.limit)
+        asserts.eq({ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x00, 0x00 }, read_all_bytes(bytes._buffer))
+    end)
+
+    suite:case("extends from friendly buffers", function(asserts)
+        const bytes = friendly_buf.allocate(2)
+        const source = friendly_buf.allocate(3)
+
+        source:write_u8(0x11)
+        source:write_u8(0x22)
+        source:write_u8(0x33)
+
+        bytes:write_u8(0xAA)
+        bytes:extend(source)
+
+        asserts.eq(4, bytes.limit)
+        asserts.eq(4, bytes.position)
+        asserts.eq({ 0xAA, 0x11, 0x22, 0x33 }, read_all_bytes(bytes._buffer))
+        asserts.eq(3, source.position)
+    end)
+
+    suite:case("compacts unread bytes to the beginning", function(asserts)
+        const bytes = friendly_buf.allocate(6)
+
+        bytes:write_u8(0x01)
+        bytes:write_u8(0x02)
+        bytes:write_u8(0x03)
+        bytes:write_u8(0x04)
+        bytes:write_u8(0x05)
+        bytes:write_u8(0x06)
+
+        bytes.position = 2
+        bytes:compact()
+
+        asserts.eq(0, bytes.position)
+        asserts.eq(4, bytes.limit)
+        asserts.eq({ 0x03, 0x04, 0x05, 0x06 }, read_all_bytes(bytes._buffer))
+        asserts.eq(0x03, bytes:get_u8())
+        asserts.eq(0x04, bytes:get_u8())
+    end)
+
+    suite:case("compact clears fully consumed buffers without reallocating", function(asserts)
+        const bytes = friendly_buf.allocate(4)
+        const original_buffer = bytes._buffer
+
+        bytes:write_u8(0xAA)
+        bytes:write_u8(0xBB)
+        bytes:write_u8(0xCC)
+        bytes:write_u8(0xDD)
+
+        bytes:compact()
+
+        asserts.eq(original_buffer, bytes._buffer)
+        asserts.eq(0, bytes.position)
+        asserts.eq(4, bytes.limit)
+        asserts.eq({ 0x00, 0x00, 0x00, 0x00 }, read_all_bytes(bytes._buffer))
+    end)
+
+    suite:case("compact is a no-op at the beginning of the buffer", function(asserts)
+        const bytes = friendly_buf.allocate(3)
+        const original_buffer = bytes._buffer
+
+        bytes:write_u8(0xAA)
+        bytes:write_u8(0xBB)
+        bytes.position = 0
+
+        bytes:compact()
+
+        asserts.eq(original_buffer, bytes._buffer)
+        asserts.eq(0, bytes.position)
+        asserts.eq(3, bytes.limit)
+        asserts.eq({ 0xAA, 0xBB, 0x00 }, read_all_bytes(bytes._buffer))
+    end)
+
     suite:case("throws when reads and writes exceed limits", function(asserts)
         const bytes = friendly_buf.allocate(1)
 

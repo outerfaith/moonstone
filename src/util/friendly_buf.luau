@@ -2,6 +2,7 @@
 --!native
 
 const assertions = require("@moonstone/util/assertions")
+const next_power_of = require("@moonstone/util/next_power_of")
 
 type FriendlyBufProto = {
     __index: FriendlyBufProto,
@@ -32,6 +33,8 @@ type FriendlyBufProto = {
     write_i64: (self: FriendlyBuf, value: integer) -> (),
     write_string: (self: FriendlyBuf, value: string) -> (),
     write_slice: (self: FriendlyBuf, slice: FriendlyBuf | buffer) -> (),
+    extend: (self: FriendlyBuf, buf: FriendlyBuf | buffer) -> (),
+    compact: (self: FriendlyBuf) -> (),
 }
 
 export type FriendlyBuf = setmetatable<{
@@ -326,6 +329,45 @@ function friendly_buf.write_slice(self, slice)
 
     buffer.copy(self._buffer, self.position, src, 0, length)
     self.position += length
+end
+
+function friendly_buf.extend(self, buf)
+    const src = if type(buf) == "buffer" then buf else buf._buffer
+    const length = buffer.len(src)
+
+    if self.position + length > self.limit then
+        const new_length = next_power_of(self.position + length, 2)
+        const new_buf = buffer.create(new_length)
+
+        buffer.copy(new_buf, 0, self._buffer)
+
+        self.limit = new_length;
+        (self :: any)._buffer = new_buf
+    end
+
+    buffer.copy(self._buffer, self.position, src, 0, length)
+    self.position += length
+end
+
+function friendly_buf.compact(self)
+    if self.position == 0 then
+        return
+    end
+
+    if self.position == self.limit then
+        buffer.fill(self._buffer, 0, 0, self.limit)
+        self.position = 0
+        return
+    end
+
+    const unread = self.limit - self.position
+    const new_buf = buffer.create(unread)
+
+    buffer.copy(new_buf, 0, self._buffer, self.position, unread)
+
+    self.limit = unread
+    self.position = 0
+    (self :: any)._buffer = new_buf
 end
 
 --[[

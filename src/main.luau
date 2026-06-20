@@ -8,8 +8,14 @@ const task = require("@std/task")
 const net = require("@lute/net")
 
 const world = require("@moonstone/ecs/world")
+const client_connection = require("@moonstone/ecs/components/client_connection")
 const scheduler = require("@moonstone/ecs/systems/scheduler")
+const connection = require("@moonstone/network/connection")
+const frame_buffer = require("@moonstone/network/frame_buffer")
+const packet_coding = require("@moonstone/network/protocol/packet_coding")
+const packet_registry = require("@moonstone/network/protocol/packet_registry")
 const identifier = require("@moonstone/resources/identifier")
+const enum = require("@moonstone/util/enum")
 const logger = require("@moonstone/util/logger")
 
 const TICK_INTERVAL = 1 / 20
@@ -25,7 +31,46 @@ ticker
 net.server.listen({
     port = 25565,
     onconnection = function(stream, server)
-        error("not yet implemented")
+        const conn = connection.new(stream)
+        const entity = world:entity()
+
+        world:set(entity, client_connection, {
+            connection = conn,
+            frame_buf = frame_buffer.new(),
+            intent = enum.CONNECTION_INTENT.HANDSHAKE,
+        })
+
+        -- TODO(outerfaith): replace whatever the hell this is with something else
+        task.spawn(function()
+            while true do
+                const ok, err = pcall(function()
+                    const client = assert(world:get(entity, client_connection), "unreachable")
+                    const recv = conn:read()
+
+                    client.frame_buf:append(recv)
+
+                    const frame = client.frame_buf:read_frame_or_nil()
+                    if frame == nil then
+                        return
+                    end
+
+                    const registry =
+                        packet_registry.get(enum.PACKET_FLOW.SERVERBOUND, client.intent)
+                    const type, data = packet_coding.decode(frame, registry)
+
+                    -- TODO(outerfaith): packets should be stored in a queue, then
+                    -- handlers should be no-yield invoked pre-tick
+                    registry:get_handler().handler_for(type)(data, entity)
+                end)
+
+                if not ok then
+                    conn:close(false)
+                    world:delete(entity)
+                    log:error(err :: string)
+                    break
+                end
+            end
+        end)
     end,
 })
 

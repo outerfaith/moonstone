@@ -1,6 +1,17 @@
 --!optimize 2
 
-error("not yet implemented")
+export const CONNECTION_INTENT = {
+    HANDSHAKE = 0x00,
+    STATUS = 0x01,
+    LOGIN = 0x02,
+    CONFIGURATION = 0x03,
+    PLAY = 0x04,
+}
+
+export const PACKET_FLOW = {
+    CLIENTBOUND = 0x00,
+    SERVERBOUND = 0x01,
+}
 
 --[[
    Copyright 2025-2026 Outerfaith
