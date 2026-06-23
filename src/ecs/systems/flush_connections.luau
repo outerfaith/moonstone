@@ -1,15 +1,24 @@
 --!optimize 2
 
-const buffer_codec = require("@moonstone/network/buffer_codec/helper")
+const task = require("@std/task")
 
-type BufferCodec<T> = buffer_codec.BufferCodec<T>
+const jecs = require("@vendor/jecs")
 
-export type Packet<T> = {
-    read codec: BufferCodec<T>,
-    read id: number,
-}
+const client_connection = require("@moonstone/ecs/components/client_connection")
 
-return nil
+type World = jecs.World
+
+const function flush_connections(world: World, tick_delta: number)
+    const clients = world:query(client_connection)
+
+    task.spawn(function()
+        for idx, client in clients:iter() do
+            client.connection:flush()
+        end
+    end)
+end
+
+return flush_connections
 
 --[[
    Copyright 2025-2026 Outerfaith

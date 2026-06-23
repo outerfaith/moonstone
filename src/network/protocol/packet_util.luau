@@ -1,15 +1,18 @@
 --!optimize 2
 
-const buffer_codec = require("@moonstone/network/buffer_codec/helper")
+const connection = require("@moonstone/network/connection")
+const packet = require("@moonstone/network/protocol/packet")
+const lazy_require = require("@moonstone/util/lazy_require")
 
-type BufferCodec<T> = buffer_codec.BufferCodec<T>
+type Connection = connection.Connection
+type Packet<T> = packet.Packet<T>
 
-export type Packet<T> = {
-    read codec: BufferCodec<T>,
-    read id: number,
-}
+const packet_coding = lazy_require<<any>>("@moonstone/network/protocol/packet_coding")
 
-return nil
+export function send_packet<T>(connection: Connection, packet: Packet<T>, data: T)
+    const encoded = packet_coding().encode(packet, data)
+    connection:enqueue_write(encoded)
+end
 
 --[[
    Copyright 2025-2026 Outerfaith

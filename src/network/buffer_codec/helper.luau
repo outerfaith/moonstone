@@ -1,5 +1,7 @@
 --!optimize 2
 
+const json = require("@std/json")
+
 const buffer_codec = require("@moonstone/network/buffer_codec")
 const arrays = require("@moonstone/network/buffer_codec/arrays")
 const primitive_codecs = require("@moonstone/network/buffer_codec/primitives")
@@ -39,6 +41,16 @@ const function struct<T>(t: { { string | BufferCodec<unknown> } }): BufferCodec<
     end)
 end
 
+const function json_codec<T>(): BufferCodec<T>
+    return buffer_codec.new(function(buf)
+        const js = string_codecs.UNLIMITED:read(buf)
+        return json.deserialize(js)
+    end, function(buf, v)
+        const coded = json.serialize(v)
+        string_codecs.UNLIMITED:write(buf, coded)
+    end)
+end
+
 return table.freeze({
     BOOLEAN = primitive_codecs.BOOLEAN,
     BYTE = primitive_codecs.BYTE,
@@ -59,6 +71,7 @@ return table.freeze({
     new = buffer_codec.new,
     unit = unit,
     struct = struct,
+    json = json_codec,
 })
 
 --[[

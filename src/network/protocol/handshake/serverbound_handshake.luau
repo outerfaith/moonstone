@@ -18,9 +18,11 @@ const CODEC = buffer_codec.struct<<Fields>>({
     { buffer_codec.UNSIGNED_SHORT, "server_port" },
     { buffer_codec.VAR_INT, "intent" },
 })
+const ID = 0x00
 
 return table.freeze({
     codec = CODEC,
+    id = ID,
 } :: any) :: Packet<Fields>
 
 --[[

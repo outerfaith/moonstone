@@ -10,6 +10,9 @@ type Packet<T> = packet.Packet<T>
 type PacketRegistry = packet_registry.PacketRegistry
 type FriendlyBuf = friendly_buf.FriendlyBuf
 
+const DEFAULT_BUFFER_SIZE = 8192 * 16
+const MAX_PACKET_SIZE = 2 ^ 21
+
 export function decode<T>(buf: FriendlyBuf, registry: PacketRegistry): (Packet<T>, T)
     const id: number = buffer_codec.VAR_INT:read(buf)
     const type = registry:lookup(id)
@@ -19,8 +22,28 @@ export function decode<T>(buf: FriendlyBuf, registry: PacketRegistry): (Packet<T
     return type, type.codec:read(buf)
 end
 
-export function encode<T>(packet: Packet<T>, data: T, id: number): FriendlyBuf
-    error("not yet implemented")
+export function encode<T>(packet: Packet<T>, data: T): FriendlyBuf
+    const body = friendly_buf.allocate(256)
+
+    buffer_codec.VAR_INT:write(body, packet.id)
+    packet.codec:write(body, data)
+
+    const body_len = body.position
+
+    body:trim()
+
+    assert(
+        body_len <= MAX_PACKET_SIZE,
+        `packet length of '{body_len}' bytes is larger than maximum allowed size of '{MAX_PACKET_SIZE}' bytes`
+    )
+
+    const out = friendly_buf.allocate(body_len + 5)
+
+    buffer_codec.VAR_INT:write(out, body_len)
+    out:write_slice(body)
+    out:trim()
+
+    return out
 end
 
 --[[

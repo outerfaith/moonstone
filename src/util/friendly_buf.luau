@@ -35,6 +35,7 @@ type FriendlyBufProto = {
     write_slice: (self: FriendlyBuf, slice: FriendlyBuf | buffer) -> (),
     extend: (self: FriendlyBuf, buf: FriendlyBuf | buffer) -> (),
     compact: (self: FriendlyBuf) -> (),
+    trim: (self: FriendlyBuf) -> ()
 }
 
 export type FriendlyBuf = setmetatable<{
@@ -366,6 +367,20 @@ function friendly_buf.compact(self)
     buffer.copy(new_buf, 0, self._buffer, self.position, unread)
 
     self.limit = unread
+    self.position = 0
+    (self :: any)._buffer = new_buf
+end
+
+function friendly_buf.trim(self)
+    if self.position == 0 or self.position == self.limit then
+        return
+    end
+
+    const new_buf = buffer.create(self.position)
+
+    buffer.copy(new_buf, 0, self._buffer, 0, self.position)
+
+    self.limit = self.position
     self.position = 0
     (self :: any)._buffer = new_buf
 end

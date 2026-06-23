@@ -1,15 +1,37 @@
 --!optimize 2
 
 const buffer_codec = require("@moonstone/network/buffer_codec/helper")
+const packet = require("@moonstone/network/protocol/packet")
 
-type BufferCodec<T> = buffer_codec.BufferCodec<T>
+type Packet<T> = packet.Packet<T>
 
-export type Packet<T> = {
-    read codec: BufferCodec<T>,
-    read id: number,
+export type Fields = {
+    read version: {
+        read name: string,
+        read protocol: number,
+    },
+    read players: {
+        read max: number,
+        read online: number,
+        read sample: {
+            {
+                read name: string,
+                read id: string,
+            }
+        },
+    }?,
+    read description: string?,
+    read favicon: string?,
+    read enforcesSecureChat: boolean,
 }
 
-return nil
+const CODEC = buffer_codec.json<<Fields>>()
+const ID = 0x00
+
+return table.freeze({
+    codec = CODEC,
+    id = ID,
+} :: any) :: Packet<Fields>
 
 --[[
    Copyright 2025-2026 Outerfaith

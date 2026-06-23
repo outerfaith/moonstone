@@ -7,22 +7,17 @@ const patch = require("@moonstone/ecs/patch")
 const client_connection = require("@moonstone/ecs/components/client_connection")
 const handler = require("@moonstone/network/protocol/handler")
 const packet = require("@moonstone/network/protocol/packet")
-const handshake = require("@moonstone/network/protocol/handshake/serverbound/handshake_packet")
+const serverbound_handshake = require("@moonstone/network/protocol/handshake/serverbound_handshake")
 const enum = require("@moonstone/util/enum")
-const logger = require("@moonstone/util/logger")
 
 type Entity = jecs.Entity
 type PacketHandler = handler.PacketHandler
 type Packet<T> = packet.Packet<T>
 type ClientConnection = client_connection.ClientConnection
-type ServerboundHandshakePacket = handshake.Fields
-
-const LOGGER = logger.new()
+type ServerboundHandshakePacket = serverbound_handshake.Fields
 
 const function handle_handshake_packet(packet: ServerboundHandshakePacket, e: Entity)
     const client = assert(world:get(e, client_connection), "entity has no ClientConnection")
-
-    LOGGER:debug(`Setting connection intent to '{packet.intent}', previous was '{client.intent}'`)
 
     patch<<ClientConnection>>(e, client_connection, client, {
         intent = packet.intent,
@@ -30,7 +25,7 @@ const function handle_handshake_packet(packet: ServerboundHandshakePacket, e: En
 end
 
 const HANDLERS: { read [Packet<any>]: (any, Entity) -> () } = {
-    [handshake] = handle_handshake_packet,
+    [serverbound_handshake] = handle_handshake_packet,
 }
 
 const function handler_for<T>(packet: Packet<T>): (T, Entity) -> ()

@@ -2,8 +2,13 @@
 
 const handler = require("@moonstone/network/protocol/handler")
 const packet = require("@moonstone/network/protocol/packet")
-const handshake_handler = require("@moonstone/network/protocol/handshake/serverbound/handshake_handler")
-const handshake_packet = require("@moonstone/network/protocol/handshake/serverbound/handshake_packet")
+const handshake_handler = require("@moonstone/network/protocol/handshake/handshake_handler")
+const serverbound_handshake = require("@moonstone/network/protocol/handshake/serverbound_handshake")
+const clientbound_ping_response = require("@moonstone/network/protocol/status/clientbound_ping_response")
+const clientbound_status_response = require("@moonstone/network/protocol/status/clientbound_status_response")
+const serverbound_ping_request = require("@moonstone/network/protocol/status/serverbound_ping_request")
+const serverbound_status_request = require("@moonstone/network/protocol/status/serverbound_status_request")
+const status_handler = require("@moonstone/network/protocol/status/status_handler")
 const enum = require("@moonstone/util/enum")
 
 type PacketHandler = handler.PacketHandler
@@ -11,10 +16,9 @@ type Packet<T> = packet.Packet<T>
 
 type PacketRegistryProto = {
     __index: PacketRegistryProto,
-    register: (self: PacketRegistry, id: number, packet: Packet<any>) -> PacketRegistry,
+    register: (self: PacketRegistry, packet: Packet<any>) -> PacketRegistry,
     register_handler: (self: PacketRegistry, handler: PacketHandler) -> PacketRegistry,
     lookup: (self: PacketRegistry, id: number) -> Packet<unknown>?,
-    get_id: (self: PacketRegistry, packet: Packet<unknown>) -> number,
     get_handler: (self: PacketRegistry) -> PacketHandler,
     freeze: (self: PacketRegistry) -> PacketRegistry,
 }
@@ -36,7 +40,9 @@ const function create(): PacketRegistry
     }, packet_registry)
 end
 
-function packet_registry.register(self: any, id, packet)
+function packet_registry.register(self: any, packet)
+    const id = packet.id
+
     assert(id >= 0, "packet id must not be negative")
     assert(self.id_to_type[id] == nil, "id has already been registered")
     assert(self.type_to_id[packet] == nil, "packet has already been registered to another id")
@@ -58,10 +64,6 @@ function packet_registry.lookup(self, id)
     return self.id_to_type[id]
 end
 
-function packet_registry.get_id(self, packet)
-    return self.type_to_id[packet]
-end
-
 function packet_registry.get_handler(self)
     return assert(self.handler, "no packet handler registered")
 end
@@ -77,11 +79,16 @@ end
 -- stylua: ignore start
 const SERVERBOUND_HANDSHAKE = create()
     :register_handler(handshake_handler :: PacketHandler)
-    :register(0x00, handshake_packet)
+    :register(serverbound_handshake)
     :freeze()
 const SERVERBOUND_STATUS = create()
+    :register_handler(status_handler :: PacketHandler)
+    :register(serverbound_status_request)
+    :register(serverbound_ping_request)
     :freeze()
 const CLIENTBOUND_STATUS = create()
+    :register(clientbound_status_response)
+    :register(clientbound_ping_response)
     :freeze()
 const SERVERBOUND_LOGIN = create()
     :freeze()

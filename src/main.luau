@@ -9,6 +9,7 @@ const net = require("@lute/net")
 
 const world = require("@moonstone/ecs/world")
 const client_connection = require("@moonstone/ecs/components/client_connection")
+const flush_connections = require("@moonstone/ecs/systems/flush_connections")
 const scheduler = require("@moonstone/ecs/systems/scheduler")
 const connection = require("@moonstone/network/connection")
 const frame_buffer = require("@moonstone/network/frame_buffer")
@@ -26,7 +27,12 @@ const ticker = scheduler.new(world)
 ticker
     :add_phase(scheduler.create_phase_with_systems(identifier.with_default_namespace("pre"), {}))
     :add_phase(scheduler.create_phase_with_systems(identifier.with_default_namespace("tick"), {}))
-    :add_phase(scheduler.create_phase_with_systems(identifier.with_default_namespace("post"), {}))
+    :add_phase(
+        scheduler.create_phase_with_systems(
+            identifier.with_default_namespace("post"),
+            { flush_connections }
+        )
+    )
 
 net.server.listen({
     port = 25565,
